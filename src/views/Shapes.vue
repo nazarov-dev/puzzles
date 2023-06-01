@@ -1,16 +1,20 @@
 <template>
     <v-stage ref="stage" :config="stageConfig">
         <v-layer>
-            <v-path v-for="shape in shapes" :key="shape" ref="path"
-                    :config="{
-                    data: shape,
-                    strokeWidth: 1,
-                    stroke: 'black',
-                    fillPatternImage: image,
-                    }"
-                    :x="0"
-                    :y="0"
-            ></v-path>
+            <v-group :config="{x: 20, y: 20}" v-for="(row, indexV) in shapes" :key="indexV">
+                <v-path v-for="(shape, indexH) in row" :key="indexH"
+                        :config="{
+                            data: shape.path,
+                            strokeWidth: 1,
+                            stroke: 'black',
+                            fillPatternImage: image,
+                            draggable: true,
+                            }"
+                        :x="0"
+                        :y="0"
+                ></v-path>
+            </v-group>
+
         </v-layer>
     </v-stage>
 </template>
@@ -49,9 +53,24 @@
                 offset: this.offset,
             });
 
-            for (let i=1; i < 10; i++) {
-                let x = this.tileSize * i;
-                this.shapes.push(generate.shape([x,20]));
+            for (let v = 0; v < 10; v++) {
+                this.shapes.push([]);
+
+                for (let h = 0; h < 10; h++) {
+                    let x = this.tileSize * h;
+                    let y = this.tileSize * v;
+
+                    let prevV = v && this.shapes[v - 1][h];
+                    let top   = prevV.bottom || 'line';
+
+                    let prevH = h && this.shapes[v][h - 1];
+                    let left  = prevH.right || 'line';
+
+                    let right  = (h === 9) ? 'line' : null;
+                    let bottom = (v === 9) ? 'line' : null;
+
+                    this.shapes[v].push(generate.shape([x, y], {top, right, left, bottom}));
+                }
             }
 
             // this.shape = {

@@ -84,9 +84,9 @@ export function Generate({tileSize}) {
 
         let arr = [];
 
-        arr[1] = [' C', l1(), w1(),l2(), w2(),l3(), w3()];
-        arr[2] = [' C', l4(), w4(),l5(), w5(),l6(), w6()];
-        arr[3] = [' C', l7(), w7(),l8(), w8(),l9(), w9()];
+        arr[0] = [' C', l1(), w1(),l2(), w2(),l3(), w3()];
+        arr[1] = [' C', l4(), w4(),l5(), w5(),l6(), w6()];
+        arr[2] = [' C', l7(), w7(),l8(), w8(),l9(), w9()];
 
         return arr;
     };
@@ -96,14 +96,17 @@ export function Generate({tileSize}) {
 
         let arr = [];
 
-        arr[1] = [' C', w1(), l1(),w2(), l2(),w3(), l3()];
-        arr[2] = [' C', w4(), l4(),w5(), l5(),w6(), l6()];
-        arr[3] = [' C', w7(), l7(),w8(), l8(),w9(), l9()];
+        arr[0] = [' C', w1(), l1(),w2(), l2(),w3(), l3()];
+        arr[1] = [' C', w4(), l4(),w5(), l5(),w6(), l6()];
+        arr[2] = [' C', w7(), l7(),w8(), l8(),w9(), l9()];
 
         return arr;
     };
 
-    this.shape = ([xPos, yPos]) => {
+    // [xPos, yPos] - puzzle tile position on image
+    // {top, right, left, bottom} - take a tile side from previous tile
+    // for the right side of current tile set the "left" from previous tile is it exist
+    this.shape = ([xPos, yPos], { top = null, right = null, left = null, bottom = null }) => {
         offsetX = xPos;
         offsetY = yPos;
         let path = '';
@@ -111,10 +114,14 @@ export function Generate({tileSize}) {
         // first triangle
         setPos(offsetX, offsetY);
         path += [' M', l0(), w0()];
-        path += this.horizontal();
+        top = (top === 'line') ? [' L', offsetX + tileSize, offsetY] : top;
+        top = top || this.horizontal();
+        path += top;
 
         setPos(offsetY, offsetX + tileSize);
-        path += this.vertical();
+        right = (right === 'line') ? [' L', offsetX + tileSize, offsetY + tileSize] : right;
+        right = right || this.vertical();
+        path += right;
 
         // move to start point
         setPos(offsetX, offsetY);
@@ -122,11 +129,15 @@ export function Generate({tileSize}) {
 
         // second triangle
         setPos(offsetY, offsetX);
-        path += this.vertical();
+        left = (left === 'line') ? [' L', offsetX, offsetY + tileSize] : left;
+        left = left || this.vertical();
+        path += left;
 
         setPos(offsetX, offsetY + tileSize);
-        path += this.horizontal();
+        bottom = (bottom === 'line') ? [' L', offsetX + tileSize, offsetY + tileSize] : bottom;
+        bottom = bottom || this.horizontal();
+        path += bottom;
 
-        return path;
+        return {path, top, right, left, bottom};
     };
 }
