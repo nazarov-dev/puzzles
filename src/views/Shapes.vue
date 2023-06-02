@@ -1,20 +1,13 @@
 <template>
     <v-stage ref="stage" :config="stageConfig">
         <v-layer>
-            <v-group :config="{x: 20, y: 20}" v-for="(row, indexV) in shapes" :key="indexV">
-                <v-path v-for="(shape, indexH) in row" :key="indexH"
-                        :config="{
-                            data: shape.path,
-                            strokeWidth: 1,
-                            stroke: 'black',
-                            fillPatternImage: image,
-                            draggable: true,
-                            }"
-                        :x="0"
-                        :y="0"
-                ></v-path>
+            <v-group v-if="image">
+                <v-group :config="{x: 20, y: 20}" v-for="(row, indexV) in shapes" :key="indexV">
+                    <v-group v-for="(shape, indexH) in row" :key="indexH">
+                        <Shape :shape="shape" :image="image"></Shape>
+                    </v-group>
+                </v-group>
             </v-group>
-
         </v-layer>
     </v-stage>
 </template>
@@ -22,10 +15,11 @@
 <script>
     import {Generate} from '../utils/generator';
     import LoadImage from '../utils/LoadImage';
+    import Shape from "./Shape";
 
     export default {
         name: "Shapes",
-
+        components: {Shape},
         data: () => {
             return {
                 stageConfig: {
