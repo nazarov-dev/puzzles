@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import {Generate} from '../utils/generator';
+    import {Generate} from '../utils/Generator';
     import LoadImage from '../utils/LoadImage';
     import Shape from "./Shape";
 

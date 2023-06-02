@@ -8,6 +8,8 @@
                 strokeWidth: 1,
                 stroke: 'black',
                 fillPatternImage: image,
+                shadowEnabled: false,
+                shadowForStrokeEnabled: false,
                 draggable: true,
             }"
     ></v-path>
