@@ -1,6 +1,13 @@
 <template>
     <div>
-        <h1 v-show="isWin">You win!!!</h1>
+        <h1>
+            Time:
+            <GameTimer
+                    :prevTime="'3595'"
+                    :stopTimer="stopTimer"
+            ></GameTimer>
+            <span v-show="isWin"> - You win!!!</span>
+        </h1>
         <PuzzleMatrix @win="userWin"></PuzzleMatrix>
     </div>
 </template>
@@ -8,15 +15,18 @@
 <script>
     // import { /*mapState, mapGetters,*/ mapActions } from 'vuex';
     import PuzzleMatrix from './PuzzleMatrix';
+    import GameTimer from "./GameTimer";
 
 export default {
   name: 'App',
   components: {
+      GameTimer,
       PuzzleMatrix,
   },
 
     data: () => {
       return {
+          stopTimer: false,
           isWin: false,
       }
     },
@@ -28,6 +38,7 @@ export default {
     methods: {
         userWin() {
             this.isWin = true;
+            this.stopTimer = true;
         }
     },
 
