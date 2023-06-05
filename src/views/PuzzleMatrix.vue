@@ -6,7 +6,7 @@
              @dragend="handleDragend"
     >
         <v-layer ref="layer">
-            <TilesGroup v-for="group in groups"
+            <TilesGroup v-for="group in orderedGroups"
                         :key="group.id"
                         :id="group.id"
                         :tiles="group.tiles"
@@ -98,6 +98,15 @@
                 return linkedGroups;
             },
 
+            orderedGroups() {
+                // big groups where tiles count more than 5 are placed under the little groups
+
+                let bigGroups = this.groups.filter(group => group.tiles.length >= 6);
+                let smallGroups = this.groups.filter(group => group.tiles.length < 6);
+
+                return [...bigGroups, ...smallGroups];
+            },
+
         },
 
         methods: {
@@ -172,11 +181,13 @@
 
             groupDragEnd({x, y}) {
                 // check distance to linked tile groups
+                const offset = 10;
+
                 this.groupsToMerge = this.groupsLinkedToDragged.filter(group => {
                     const dx = Math.abs(group.x - x);
                     const dy = Math.abs(group.y - y);
 
-                    return dx <= 10 && dy <= 10
+                    return dx <= offset && dy <= offset
                 });
 
                 let mergedGroups = this.mergeGroups();
@@ -184,7 +195,6 @@
                 // change groups order by sets a dragged group to the top
                 this.pushGroupToTop(mergedGroups);
             },
-
 
         },
 
