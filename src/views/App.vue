@@ -1,17 +1,17 @@
 <template>
     <div>
-        <Shapes></Shapes>
+        <PuzzleMatrix></PuzzleMatrix>
     </div>
 </template>
 
 <script>
     // import { /*mapState, mapGetters,*/ mapActions } from 'vuex';
-    import Shapes from './Shapes';
+    import PuzzleMatrix from './PuzzleMatrix';
 
 export default {
   name: 'App',
   components: {
-      Shapes,
+      PuzzleMatrix,
   },
 
     data: () => {

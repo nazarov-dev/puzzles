@@ -1,30 +1,34 @@
 <template>
     <v-path
-            ref="puzzle"
+            ref="puzzleTile"
             :config="{
-                // x: 40,
-                // y: 80,
-                data: shape.path,
+                x,
+                y,
+                data: path,
                 strokeWidth: 1,
                 stroke: 'black',
                 fillPatternImage: image,
                 shadowEnabled: false,
                 shadowForStrokeEnabled: false,
-                draggable: true,
             }"
     ></v-path>
 </template>
 
 <script>
     export default {
-        name: "Shape",
+        name: "PuzzleTile",
         props: [
-            'shape',
+            'path',
             'image',
+            'id',
+            'x',
+            'y',
+            'tileSize',
+            'linked',
         ],
 
         mounted() {
-            this.$refs.puzzle.getNode().cache();
+            this.$refs['puzzleTile'].getNode().cache();
         },
 
     }

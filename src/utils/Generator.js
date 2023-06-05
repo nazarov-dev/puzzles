@@ -1,3 +1,4 @@
+import {roundNumbetTo2Digits} from './MyMath'
 
 export function Generate({tileSize}) {
     const tabSize = (20 / 200); // tiles connection shape size
@@ -27,12 +28,12 @@ export function Generate({tileSize}) {
 
     const l = (v) => {
         const r = x + tileSize * v; // setPosition (x) + tile_size (height) * curveK (v)
-        return Math.floor(r * 100) / 100;
+        return roundNumbetTo2Digits(r);
     };
 
     const w = (v) => {
         const r = y + tileSize * v * (flip ? -1 : 1);
-        return Math.floor(r * 100) / 100;
+        return roundNumbetTo2Digits(r);
     };
 
     const l0 = () => l(0);
@@ -106,7 +107,7 @@ export function Generate({tileSize}) {
     // [xPos, yPos] - puzzle tile position on image
     // {top, right, left, bottom} - take a tile side from previous tile
     // for the right side of current tile set the "left" from previous tile is it exist
-    this.shape = ([xPos, yPos], { top = null, right = null, left = null, bottom = null }) => {
+    this.tile = ([xPos, yPos], { top = null, right = null, left = null, bottom = null }) => {
         offsetX = xPos;
         offsetY = yPos;
         let path = '';
