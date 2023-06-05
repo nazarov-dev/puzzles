@@ -1,6 +1,7 @@
 <template>
     <div>
-        <PuzzleMatrix></PuzzleMatrix>
+        <h1 v-show="isWin">You win!!!</h1>
+        <PuzzleMatrix @win="userWin"></PuzzleMatrix>
     </div>
 </template>
 
@@ -16,7 +17,7 @@ export default {
 
     data: () => {
       return {
-
+          isWin: false,
       }
     },
 
@@ -25,7 +26,9 @@ export default {
     },
 
     methods: {
-
+        userWin() {
+            this.isWin = true;
+        }
     },
 
     beforeMount() {

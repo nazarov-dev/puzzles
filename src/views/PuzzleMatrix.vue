@@ -198,6 +198,14 @@
 
         },
 
+        watch: {
+            groups() {
+                if (this.groups.length === 1) {
+                    this.$emit('win');
+                }
+            }
+        },
+
         mounted() {
             const generate = new Generate({
                 tileSize: this.tileSize,
