@@ -1,6 +1,6 @@
 import {roundNumbetTo2Digits} from './MyMath'
 
-export function Generate({tileSize}) {
+export function Generate({tileWidth, tileHeight}) {
     const tabSize = (20 / 200); // tiles connection shape size
     const jitter = (4 / 100);
     let seed = Math.random() * 10000;
@@ -10,6 +10,7 @@ export function Generate({tileSize}) {
     let offsetY = 0;
     let x = 0;
     let y = 0;
+    let isVertical = false;
 
     const random = () => {
         seed++;
@@ -27,11 +28,13 @@ export function Generate({tileSize}) {
     };
 
     const l = (v) => {
+        const tileSize = isVertical ? tileHeight : tileWidth;
         const r = x + tileSize * v; // setPosition (x) + tile_size (height) * curveK (v)
         return roundNumbetTo2Digits(r);
     };
 
     const w = (v) => {
+        const tileSize = isVertical ? tileWidth : tileHeight;
         const r = y + tileSize * v * (flip ? -1 : 1);
         return roundNumbetTo2Digits(r);
     };
@@ -81,6 +84,7 @@ export function Generate({tileSize}) {
     };
 
     this.horizontal = () => {
+        isVertical = false;
         first();
 
         let arr = [];
@@ -93,6 +97,7 @@ export function Generate({tileSize}) {
     };
 
     this.vertical = () => {
+        isVertical = true;
         first();
 
         let arr = [];
@@ -115,12 +120,12 @@ export function Generate({tileSize}) {
         // first triangle
         setPos(offsetX, offsetY);
         path += [' M', l0(), w0()];
-        top = (top === 'line') ? [' L', offsetX + tileSize, offsetY] : top;
+        top = (top === 'line') ? [' L', offsetX + tileWidth, offsetY] : top;
         top = top || this.horizontal();
         path += top;
 
-        setPos(offsetY, offsetX + tileSize);
-        right = (right === 'line') ? [' L', offsetX + tileSize, offsetY + tileSize] : right;
+        setPos(offsetY, offsetX + tileWidth);
+        right = (right === 'line') ? [' L', offsetX + tileWidth, offsetY + tileHeight] : right;
         right = right || this.vertical();
         path += right;
 
@@ -130,12 +135,12 @@ export function Generate({tileSize}) {
 
         // second triangle
         setPos(offsetY, offsetX);
-        left = (left === 'line') ? [' L', offsetX, offsetY + tileSize] : left;
+        left = (left === 'line') ? [' L', offsetX, offsetY + tileHeight] : left;
         left = left || this.vertical();
         path += left;
 
-        setPos(offsetX, offsetY + tileSize);
-        bottom = (bottom === 'line') ? [' L', offsetX + tileSize, offsetY + tileSize] : bottom;
+        setPos(offsetX, offsetY + tileHeight);
+        bottom = (bottom === 'line') ? [' L', offsetX + tileWidth, offsetY + tileHeight] : bottom;
         bottom = bottom || this.horizontal();
         path += bottom;
 

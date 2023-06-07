@@ -13,7 +13,6 @@
                         :x="group.x"
                         :y="group.y"
                         :image="image"
-                        :tileSize="tileSize"
                         @dragStart="groupDragStart"
                         @dragEnd="groupDragEnd"
             ></TilesGroup>
@@ -34,6 +33,15 @@
         components: {
             TilesGroup
         },
+
+        props: [
+            'imgSrc',
+            'imgWidth',
+            'imgHeight',
+            'tilesHorizontal',
+            'tilesVertical',
+        ],
+
         data: () => {
             return {
                 stageConfig: {
@@ -48,12 +56,29 @@
                 draggingGroupId: null,
                 groupsToMerge: [],
 
-                tileSize: 40,
+                // tileWidth: 60,
+                // tileHeight: 40,
                 image: null,
             }
         },
 
         computed: {
+            tileWidth() {
+                return this.imgWidth / this.tilesHorizontal;
+            },
+
+            tileHeight() {
+                return this.imgHeight / this.tilesVertical;
+            },
+
+            connectionOffsetX() {
+                return this.tileWidth / 8; // connector part have size width: (tileWidth / 4)
+            },
+
+            connectionOffsetY() {
+                return this.tileHeight / 8; // connector part have size height: (tileHeight / 4)
+            },
+
             stage() {
                 return this.$refs.stage.getNode();
             },
@@ -181,48 +206,46 @@
 
             groupDragEnd({x, y}) {
                 // check distance to linked tile groups
-                const offset = 10;
-
                 this.groupsToMerge = this.groupsLinkedToDragged.filter(group => {
                     const dx = Math.abs(group.x - x);
                     const dy = Math.abs(group.y - y);
 
-                    return dx <= offset && dy <= offset
+                    return dx <= this.connectionOffsetX && dy <= this.connectionOffsetY;
                 });
 
                 let mergedGroups = this.mergeGroups();
 
                 // change groups order by sets a dragged group to the top
                 this.pushGroupToTop(mergedGroups);
+
+                this.checkGameIsEnd();
+            },
+
+            checkGameIsEnd() {
+                if (this.groups.length === 1) {
+                    this.$emit('win');
+                }
             },
 
         },
 
-        watch: {
-            groups() {
-                if (this.groups.length === 1) {
-                    this.$emit('win');
-                }
-            }
-        },
-
         mounted() {
             const generate = new Generate({
-                tileSize: this.tileSize,
-                offset: this.offset,
+                tileWidth: this.tileWidth,
+                tileHeight: this.tileHeight,
             });
 
             const
-                tilesH = 5,
-                tilesV = 4;
+                tilesH = +this.tilesHorizontal,
+                tilesV = +this.tilesVertical;
 
             // generate puzzle tiles matrix (grid)
             for (let v = 0; v < tilesV; v++) {
                 // this.puzzles.push([]);
 
                 for (let h = 0; h < tilesH; h++) {
-                    let x = this.tileSize * h;
-                    let y = this.tileSize * v;
+                    let x = this.tileWidth * h;
+                    let y = this.tileHeight * v;
 
                     let prevV = v && this.puzzles[this.createId(v - 1, h)];
                     let top   = prevV.bottom || 'line';
@@ -258,7 +281,6 @@
                     }
 
                     tile.linked = linked;
-                    // also set linked bottom (link top) and right (link left) for previous tiles
 
                     // create puzzle tile items
                     Vue.set(this.puzzles, tileId, tile);
@@ -277,12 +299,9 @@
 
             }
 
-
-            const imgSrc = 'https://img.the-village.com.ua/the-village.com.ua/post_image-image/I2ZplgsElJ6IkFrOxgjqsw.jpg';
-
             LoadImage((img) => {
                 this.image = img;
-            }, imgSrc);
+            }, this.imgSrc);
 
         }
     }

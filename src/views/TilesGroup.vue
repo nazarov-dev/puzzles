@@ -13,7 +13,6 @@
                     :path="tile.path"
                     :image="image"
                     :id="tile.id"
-                    :tileSize="tileSize"
                     :linked="tile.linked"
         ></PuzzleTile>
     </v-group>
@@ -35,7 +34,6 @@
             'x',
             'y',
             'image', // use provide/inject
-            'tileSize',
         ],
 
         methods: {

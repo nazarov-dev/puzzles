@@ -23,7 +23,6 @@
             'id',
             'x',
             'y',
-            'tileSize',
             'linked',
         ],
 
