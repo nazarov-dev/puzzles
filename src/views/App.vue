@@ -1,5 +1,8 @@
 <template>
     <div>
+        <button @click="displayImagePreview">Preview</button>
+        <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
+
         <h1>
             Time:
             <GameTimer
@@ -9,7 +12,7 @@
             <span v-show="isWin"> - You win!!!</span>
         </h1>
         <PuzzleMatrix
-                :imgSrc="'https://img.the-village.com.ua/the-village.com.ua/post_image-image/I2ZplgsElJ6IkFrOxgjqsw.jpg'"
+                :imgSrc="imgSrc"
                 :imgWidth="200"
                 :imgHeight="120"
                 :tilesHorizontal="4"
@@ -22,10 +25,12 @@
 <script>
     import PuzzleMatrix from './PuzzleMatrix';
     import GameTimer from "./GameTimer";
+    import ImagePreview from "./ImagePreview";
 
 export default {
   name: 'App',
   components: {
+      ImagePreview,
       GameTimer,
       PuzzleMatrix,
   },
@@ -34,6 +39,8 @@ export default {
       return {
           stopTimer: false,
           isWin: false,
+          showPreview: false,
+          imgSrc: 'https://img.the-village.com.ua/the-village.com.ua/post_image-image/I2ZplgsElJ6IkFrOxgjqsw.jpg',
       }
     },
 
@@ -45,7 +52,12 @@ export default {
         userWin() {
             this.isWin = true;
             this.stopTimer = true;
-        }
+        },
+
+        displayImagePreview() {
+            this.showPreview = !this.showPreview;
+        },
+
     },
 }
 </script>
