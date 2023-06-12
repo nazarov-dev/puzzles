@@ -1,6 +1,6 @@
-import {roundNumbetTo2Digits} from './MyMath'
+import { roundNumbetTo2Digits, twoDigitsStr } from './MyMath';
 
-export function Generate({tileWidth, tileHeight}) {
+export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHeight = 20}) {
     const tabSize = (20 / 200); // tiles connection shape size
     const jitter = (4 / 100);
     let seed = Math.random() * 10000;
@@ -109,6 +109,11 @@ export function Generate({tileWidth, tileHeight}) {
         return arr;
     };
 
+    this.makeTileId = (indexV, indexH) => {
+        // type: String
+        return twoDigitsStr(indexV) + twoDigitsStr(indexH);
+    };
+
     // [xPos, yPos] - puzzle tile position on image
     // {top, right, left, bottom} - take a tile side from previous tile
     // for the right side of current tile set the "left" from previous tile is it exist
@@ -146,4 +151,64 @@ export function Generate({tileWidth, tileHeight}) {
 
         return {path, top, right, left, bottom};
     };
+
+    this.createTileSides = ({prevV, prevH, v, h}) => {
+        // the 'line' is the border around the puzzles
+        const top   = prevV.bottom || 'line';
+        const left  = prevH.right || 'line';
+        const right  = (h === tilesH - 1) ? 'line' : null;
+        const bottom = (v === tilesV - 1) ? 'line' : null;
+
+        return {top, right, left, bottom};
+    };
+
+    this.createPuzzles = () => {
+        const puzzles = {};
+
+        // generate puzzle tiles matrix (grid)
+        for (let v = 0; v < tilesV; v++) {
+            for (let h = 0; h < tilesH; h++) {
+                let x = tileWidth * h;
+                let y = tileHeight * v;
+
+                const prevV = v && puzzles[this.makeTileId(v - 1, h)];
+                const prevH = h && puzzles[this.makeTileId(v, h - 1)];
+
+                let tileSides = this.createTileSides({prevV, prevH, v, h});
+
+                // create puzzle tile item
+                let tile = this.tile([x, y], tileSides);
+
+                // set tile id
+                let tileId = this.makeTileId(v, h);
+                tile.id = tileId;
+
+                // make links to neighbors
+                let linked = {
+                    top: null,
+                    left: null,
+                    right: null,
+                    bottom: null,
+                };
+
+                if (prevV) {
+                    linked.top = prevV.id;
+                    prevV.linked['bottom'] = tileId;
+                }
+
+                if (prevH) {
+                    linked.left = prevH.id;
+                    prevH.linked['right'] = tileId
+                }
+
+                tile.linked = linked;
+
+                // add the created tile item to the puzzles
+                puzzles[tileId] = tile;
+            }
+        }
+
+        return puzzles;
+    };
+
 }

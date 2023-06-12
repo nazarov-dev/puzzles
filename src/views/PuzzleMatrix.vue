@@ -25,10 +25,8 @@
 </template>
 
 <script>
-    import Vue from 'vue';
-    import { Generate } from '../utils/Generator';
+    import { PuzzlesGenerator } from '../utils/PuzzlesGenerator';
     import LoadImage from '../utils/LoadImage';
-    import { twoDigitsStr } from '../utils/MyMath';
     import TilesGroup from "./TilesGroup";
 
     export default {
@@ -58,16 +56,14 @@
                 puzzles: {},
                 groups: [],
                 draggingGroupId: null,
-                groupsToMerge: [],
-
-                // tileWidth: 60,
-                // tileHeight: 40,
                 image: null,
             }
         },
 
         computed: {
             puzzleSize() {
+                // The size of the Puzzle takes into account the size of the Canvas
+
                 let
                     width = this.width,
                     height = this.height;
@@ -89,6 +85,8 @@
             },
 
             imageScale() {
+                // The size of the loaded Image takes into account the size of the Puzzle
+
                 let scale = 1;
 
                 if (this.image) {
@@ -110,11 +108,11 @@
             },
 
             connectionOffsetX() {
-                return this.tileWidth / 8; // connector part have size width: (tileWidth / 4)
+                return this.tileWidth / 8; // 50% of connector size; connector part have size width: (tileWidth / 4)
             },
 
             connectionOffsetY() {
-                return this.tileHeight / 8; // connector part have size height: (tileHeight / 4)
+                return this.tileHeight / 8; // 50% of connector size; connector part have size height: (tileHeight / 4)
             },
 
             stage() {
@@ -162,7 +160,7 @@
             },
 
             orderedGroups() {
-                // big groups where tiles count more than 5 are placed under the little groups
+                // big groups where tiles count more than 6 are placed under the little groups
 
                 let bigGroups = this.groups.filter(group => group.tiles.length >= 6);
                 let smallGroups = this.groups.filter(group => group.tiles.length < 6);
@@ -173,11 +171,6 @@
         },
 
         methods: {
-            createId(indexV, indexH) {
-                // type: String
-                return twoDigitsStr(indexV) + twoDigitsStr(indexH);
-            },
-
             getGroupIndexById(id) {
                 return this.groups.findIndex(group => group.id === id);
             },
@@ -192,20 +185,20 @@
                 return this.groups.splice(index, 1)[0];
             },
 
-            mergeGroups() {
+            mergeGroups(groupsToMerge) {
                 // merge draggingGroup and other linked groups to the first found group
                 let draggingGroup = this.removeGroupFromGroups(this.draggingGroup);
 
-                if (!this.groupsToMerge.length) return draggingGroup;
+                if (!groupsToMerge.length) return draggingGroup;
 
                 // get first group for merge
-                let firstGroup = this.groupsToMerge.shift();
+                let firstGroup = groupsToMerge.shift();
 
                 // remove this first group from groups
                 let mergedGroup = this.removeGroupFromGroups(firstGroup);
 
-                // merge other groups tiles to the first group
-                this.groupsToMerge.forEach(group => {
+                // merge other groups of tiles to the first group
+                groupsToMerge.forEach(group => {
                     let removedGroup = this.removeGroupFromGroups(group);
 
                     mergedGroup.tiles = [...mergedGroup.tiles, ...removedGroup.tiles];
@@ -244,14 +237,14 @@
 
             groupDragEnd({x, y}) {
                 // check distance to linked tile groups
-                this.groupsToMerge = this.groupsLinkedToDragged.filter(group => {
+                let groupsToMerge = this.groupsLinkedToDragged.filter(group => {
                     const dx = Math.abs(group.x - x);
                     const dy = Math.abs(group.y - y);
 
                     return dx <= this.connectionOffsetX && dy <= this.connectionOffsetY;
                 });
 
-                let mergedGroups = this.mergeGroups();
+                let mergedGroups = this.mergeGroups(groupsToMerge);
 
                 // change groups order by sets a dragged group to the top
                 this.pushGroupToTop(mergedGroups);
@@ -265,72 +258,36 @@
                 }
             },
 
-            initPuzzles() {
-                const generate = new Generate({
+            createPuzzles() {
+                const generator = new PuzzlesGenerator({
+                    tilesH: +this.tilesHorizontal,
+                    tilesV: +this.tilesVertical,
                     tileWidth: this.tileWidth,
                     tileHeight: this.tileHeight,
                 });
 
-                const
-                    tilesH = +this.tilesHorizontal,
-                    tilesV = +this.tilesVertical;
+                this.puzzles = generator.createPuzzles();
+            },
 
-                // generate puzzle tiles matrix (grid)
-                for (let v = 0; v < tilesV; v++) {
-                    for (let h = 0; h < tilesH; h++) {
-                        let x = this.tileWidth * h;
-                        let y = this.tileHeight * v;
+            makeRamdomPosition() {
+                let x = Math.floor(Math.random() * 200); // 200 - depend to window size AND start tile position
+                let y = Math.floor(Math.random() * 100);
 
-                        let prevV = v && this.puzzles[this.createId(v - 1, h)];
-                        let top   = prevV.bottom || 'line';
+                return {x, y};
+            },
 
-                        let prevH = h && this.puzzles[this.createId(v, h - 1)];
-                        let left  = prevH.right || 'line';
+            initPuzzleGroups() {
+                for (const [tileId, tile] of Object.entries(this.puzzles)) {
+                    let pos = this.makeRamdomPosition();
 
-                        let right  = (h === tilesH - 1) ? 'line' : null;
-                        let bottom = (v === tilesV - 1) ? 'line' : null;
+                    let group = {
+                        id: tileId, // we can take the same tile id for the group
+                        tiles: [tile],
+                        x: pos.x,
+                        y: pos.y,
+                    };
 
-                        let tile = generate.tile([x, y], {top, right, left, bottom});
-
-                        // set tile id
-                        let tileId = this.createId(v, h);
-                        tile.id = tileId;
-
-                        // make links to neighbors
-                        let linked = {
-                            top: null,
-                            left: null,
-                            right: null,
-                            bottom: null,
-                        };
-
-                        if (prevV) {
-                            linked.top = prevV.id;
-                            Vue.set(prevV.linked, 'bottom', tileId);
-                        }
-
-                        if (prevH) {
-                            linked.left = prevH.id;
-                            Vue.set(prevH.linked, 'right', tileId);
-                        }
-
-                        tile.linked = linked;
-
-                        // create puzzle tile items
-                        Vue.set(this.puzzles, tileId, tile);
-
-                        // make a group for each of tiles
-                        let group = {
-                            id: tileId, // we can take the same tile id for the group
-                            tiles: [tile],
-                            // set random position
-                            x: Math.floor(Math.random() * 200), // 200 - depend to window size AND start tile position
-                            y: Math.floor(Math.random() * 100),
-                        };
-
-                        this.groups.push(group);
-                    }
-
+                    this.groups.push(group);
                 }
             },
 
@@ -339,8 +296,6 @@
 
                 this.stageConfig.width = $container.offsetWidth;
                 this.stageConfig.height = $container.offsetHeight;
-
-                console.log(111);
             },
         },
 
@@ -350,7 +305,10 @@
             LoadImage((img) => {
                 this.image = img;
 
-                this.initPuzzles();
+                this.createPuzzles();
+
+                // make a group for each of tiles
+                this.initPuzzleGroups();
             }, this.imgSrc);
 
             window.addEventListener('resize', this.updateCanvasSize, false);

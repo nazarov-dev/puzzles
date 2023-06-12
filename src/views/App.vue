@@ -59,10 +59,6 @@ export default {
       }
     },
 
-    computed: {
-
-    },
-
     methods: {
         userWin() {
             this.isWin = true;

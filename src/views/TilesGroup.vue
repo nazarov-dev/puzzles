@@ -34,7 +34,7 @@
             'tiles',
             'x',
             'y',
-            'image', // use provide/inject
+            'image',
             'imageScale',
         ],
 
