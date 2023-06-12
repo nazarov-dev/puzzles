@@ -12,6 +12,7 @@
                     :key="tile.id"
                     :path="tile.path"
                     :image="image"
+                    :imageScale="imageScale"
                     :id="tile.id"
                     :linked="tile.linked"
         ></PuzzleTile>
@@ -34,6 +35,7 @@
             'x',
             'y',
             'image', // use provide/inject
+            'imageScale',
         ],
 
         methods: {

@@ -8,6 +8,9 @@
                 strokeWidth: 1,
                 stroke: 'black',
                 fillPatternImage: image,
+                fillPatternScaleX: imageScale,
+                fillPatternScaleY: imageScale,
+                fillPatternRepeat: 'no-repeat',
                 shadowEnabled: false,
                 shadowForStrokeEnabled: false,
             }"
@@ -20,6 +23,7 @@
         props: [
             'path',
             'image',
+            'imageScale',
             'id',
             'x',
             'y',

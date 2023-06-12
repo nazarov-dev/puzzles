@@ -1,24 +1,27 @@
 <template>
-    <v-stage v-if="image"
-             ref="stage"
-             :config="stageConfig"
-             @dragstart="handleDragstart"
-             @dragend="handleDragend"
-    >
-        <v-layer ref="layer">
-            <TilesGroup v-for="group in orderedGroups"
-                        :key="group.id"
-                        :id="group.id"
-                        :tiles="group.tiles"
-                        :x="group.x"
-                        :y="group.y"
-                        :image="image"
-                        @dragStart="groupDragStart"
-                        @dragEnd="groupDragEnd"
-            ></TilesGroup>
-        </v-layer>
-        <v-layer ref="dragLayer"></v-layer>
-    </v-stage>
+    <div id="puzzle-container" ref="canvasContainer">
+        <v-stage v-if="image"
+                 ref="stage"
+                 :config="stageConfig"
+                 @dragstart="handleDragstart"
+                 @dragend="handleDragend"
+        >
+            <v-layer ref="layer">
+                <TilesGroup v-for="group in orderedGroups"
+                            :key="group.id"
+                            :id="group.id"
+                            :tiles="group.tiles"
+                            :x="group.x"
+                            :y="group.y"
+                            :image="image"
+                            :imageScale="imageScale"
+                            @dragStart="groupDragStart"
+                            @dragEnd="groupDragEnd"
+                ></TilesGroup>
+            </v-layer>
+            <v-layer ref="dragLayer"></v-layer>
+        </v-stage>
+    </div>
 </template>
 
 <script>
@@ -35,18 +38,19 @@
         },
 
         props: [
-            'imgSrc',
-            'imgWidth',
-            'imgHeight',
             'tilesHorizontal',
             'tilesVertical',
+            'width',
+            'height',
+            'offset',
+            'imgSrc',
         ],
 
         data: () => {
             return {
                 stageConfig: {
-                    width: 800,
-                    height: 600,
+                    width: 100,
+                    height: 100,
                     offsetX: -0.5,
                     offsetY: -0.5,
                 },
@@ -63,12 +67,46 @@
         },
 
         computed: {
+            puzzleSize() {
+                let
+                    width = this.width,
+                    height = this.height;
+
+                let scale = Math.min(
+                    (this.stageConfig.width - this.offset*2) / width,
+                    (this.stageConfig.height - this.offset*2) / height
+                );
+
+                if (scale < 1) {
+                    width *= scale;
+                    height *= scale;
+                }
+
+                return {
+                    width,
+                    height,
+                }
+            },
+
+            imageScale() {
+                let scale = 1;
+
+                if (this.image) {
+                    scale = Math.min(
+                        this.puzzleSize.width / this.image.width,
+                        this.puzzleSize.height / this.image.height
+                    );
+                }
+
+                return scale;
+            },
+
             tileWidth() {
-                return this.imgWidth / this.tilesHorizontal;
+                return this.puzzleSize.width / this.tilesHorizontal;
             },
 
             tileHeight() {
-                return this.imgHeight / this.tilesVertical;
+                return this.puzzleSize.height / this.tilesVertical;
             },
 
             connectionOffsetX() {
@@ -227,86 +265,110 @@
                 }
             },
 
+            initPuzzles() {
+                const generate = new Generate({
+                    tileWidth: this.tileWidth,
+                    tileHeight: this.tileHeight,
+                });
+
+                const
+                    tilesH = +this.tilesHorizontal,
+                    tilesV = +this.tilesVertical;
+
+                // generate puzzle tiles matrix (grid)
+                for (let v = 0; v < tilesV; v++) {
+                    for (let h = 0; h < tilesH; h++) {
+                        let x = this.tileWidth * h;
+                        let y = this.tileHeight * v;
+
+                        let prevV = v && this.puzzles[this.createId(v - 1, h)];
+                        let top   = prevV.bottom || 'line';
+
+                        let prevH = h && this.puzzles[this.createId(v, h - 1)];
+                        let left  = prevH.right || 'line';
+
+                        let right  = (h === tilesH - 1) ? 'line' : null;
+                        let bottom = (v === tilesV - 1) ? 'line' : null;
+
+                        let tile = generate.tile([x, y], {top, right, left, bottom});
+
+                        // set tile id
+                        let tileId = this.createId(v, h);
+                        tile.id = tileId;
+
+                        // make links to neighbors
+                        let linked = {
+                            top: null,
+                            left: null,
+                            right: null,
+                            bottom: null,
+                        };
+
+                        if (prevV) {
+                            linked.top = prevV.id;
+                            Vue.set(prevV.linked, 'bottom', tileId);
+                        }
+
+                        if (prevH) {
+                            linked.left = prevH.id;
+                            Vue.set(prevH.linked, 'right', tileId);
+                        }
+
+                        tile.linked = linked;
+
+                        // create puzzle tile items
+                        Vue.set(this.puzzles, tileId, tile);
+
+                        // make a group for each of tiles
+                        let group = {
+                            id: tileId, // we can take the same tile id for the group
+                            tiles: [tile],
+                            // set random position
+                            x: Math.floor(Math.random() * 200), // 200 - depend to window size AND start tile position
+                            y: Math.floor(Math.random() * 100),
+                        };
+
+                        this.groups.push(group);
+                    }
+
+                }
+            },
+
+            updateCanvasSize () {
+                let $container = this.$refs.canvasContainer;
+
+                this.stageConfig.width = $container.offsetWidth;
+                this.stageConfig.height = $container.offsetHeight;
+
+                console.log(111);
+            },
         },
 
         mounted() {
-            const generate = new Generate({
-                tileWidth: this.tileWidth,
-                tileHeight: this.tileHeight,
-            });
-
-            const
-                tilesH = +this.tilesHorizontal,
-                tilesV = +this.tilesVertical;
-
-            // generate puzzle tiles matrix (grid)
-            for (let v = 0; v < tilesV; v++) {
-                // this.puzzles.push([]);
-
-                for (let h = 0; h < tilesH; h++) {
-                    let x = this.tileWidth * h;
-                    let y = this.tileHeight * v;
-
-                    let prevV = v && this.puzzles[this.createId(v - 1, h)];
-                    let top   = prevV.bottom || 'line';
-
-                    let prevH = h && this.puzzles[this.createId(v, h - 1)];
-                    let left  = prevH.right || 'line';
-
-                    let right  = (h === tilesH - 1) ? 'line' : null;
-                    let bottom = (v === tilesV - 1) ? 'line' : null;
-
-                    let tile = generate.tile([x, y], {top, right, left, bottom});
-
-                    // set tile id
-                    let tileId = this.createId(v, h);
-                    tile.id = tileId;
-
-                    // make links to neighbors
-                    let linked = {
-                        top: null,
-                        left: null,
-                        right: null,
-                        bottom: null,
-                    };
-
-                    if (prevV) {
-                        linked.top = prevV.id;
-                        Vue.set(prevV.linked, 'bottom', tileId);
-                    }
-
-                    if (prevH) {
-                        linked.left = prevH.id;
-                        Vue.set(prevH.linked, 'right', tileId);
-                    }
-
-                    tile.linked = linked;
-
-                    // create puzzle tile items
-                    Vue.set(this.puzzles, tileId, tile);
-
-                    // make a group for each of tiles
-                    let group = {
-                        id: tileId, // we can take the same tile id for the group
-                        tiles: [tile],
-                        // set random position
-                        x: Math.floor(Math.random() * 200), // 200 - depend to window size AND start tile position
-                        y: Math.floor(Math.random() * 100),
-                    };
-
-                    this.groups.push(group);
-                }
-
-            }
+            this.updateCanvasSize();
 
             LoadImage((img) => {
                 this.image = img;
+
+                this.initPuzzles();
             }, this.imgSrc);
 
-        }
+            window.addEventListener('resize', this.updateCanvasSize, false);
+        },
+
+        beforeDestroy() {
+            window.removeEventListener('resize', this.updateCanvasSize, false);
+        },
+
     }
 </script>
 
 <style scoped>
-
+    #puzzle-container {
+        max-width: 100%;
+        width: 600px;
+        height: 450px;
+        margin: 20px auto;
+        background: #eee;
+    }
 </style>

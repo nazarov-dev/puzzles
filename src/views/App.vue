@@ -13,10 +13,11 @@
         </h1>
         <PuzzleMatrix
                 :imgSrc="imgSrc"
-                :imgWidth="200"
-                :imgHeight="120"
-                :tilesHorizontal="4"
+                :width="width"
+                :height="height"
+                :tilesHorizontal="2"
                 :tilesVertical="3"
+                :offset="20"
                 @win="userWin"
         ></PuzzleMatrix>
     </div>
@@ -40,7 +41,21 @@ export default {
           stopTimer: false,
           isWin: false,
           showPreview: false,
-          imgSrc: 'https://img.the-village.com.ua/the-village.com.ua/post_image-image/I2ZplgsElJ6IkFrOxgjqsw.jpg',
+
+          // horizontal image
+          // width: 900,
+          // height: 600,
+          // imgSrc: 'https://img.the-village.com.ua/the-village.com.ua/post_image-image/I2ZplgsElJ6IkFrOxgjqsw.jpg',
+
+          // vertical image
+          width: 1200,
+          height: 1600,
+          imgSrc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
+
+          // small image
+          // width: 367,
+          // height: 280,
+          // imgSrc: 'https://www.shutterstock.com/image-vector/vector-antonyms-opposites-cartoon-characters-260nw-1246528834.jpg',
       }
     },
 
