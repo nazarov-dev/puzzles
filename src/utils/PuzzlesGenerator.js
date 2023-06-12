@@ -149,7 +149,7 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
         bottom = bottom || this.horizontal();
         path += bottom;
 
-        return {path, top, right, left, bottom};
+        return {path, top, right, left, bottom, offsetX, offsetY};
     };
 
     this.createTileSides = ({prevV, prevH, v, h}) => {

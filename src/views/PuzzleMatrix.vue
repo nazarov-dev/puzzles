@@ -168,6 +168,16 @@
                 return [...bigGroups, ...smallGroups];
             },
 
+            groupPositionLimits() {
+                let xMin = this.offset + this.connectionOffsetX;
+                let xMax = this.stageConfig.width - this.tileWidth - (xMin * 2);
+
+                let yMin = this.offset + this.connectionOffsetY;
+                let yMax = this.stageConfig.height - this.tileHeight - (yMin * 2);
+
+                return {xMin, xMax, yMin, yMax};
+            },
+
         },
 
         methods: {
@@ -269,16 +279,19 @@
                 this.puzzles = generator.createPuzzles();
             },
 
-            makeRamdomPosition() {
-                let x = Math.floor(Math.random() * 200); // 200 - depend to window size AND start tile position
-                let y = Math.floor(Math.random() * 100);
+            makeRandomPosition(offsetX, offsetY) {
+                // offsetX, offsetY: tile offset position in the group
+                const l = this.groupPositionLimits;
+
+                let x = l.xMin + Math.floor(Math.random() * l.xMax) - offsetX;
+                let y = l.yMin + Math.floor(Math.random() * l.yMax) - offsetY;
 
                 return {x, y};
             },
 
             initPuzzleGroups() {
                 for (const [tileId, tile] of Object.entries(this.puzzles)) {
-                    let pos = this.makeRamdomPosition();
+                    let pos = this.makeRandomPosition(tile.offsetX, tile.offsetY);
 
                     let group = {
                         id: tileId, // we can take the same tile id for the group

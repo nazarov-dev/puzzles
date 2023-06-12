@@ -1,8 +1,5 @@
 <template>
     <div>
-        <button @click="displayImagePreview">Preview</button>
-        <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
-
         <h1>
             Time:
             <GameTimer
@@ -11,11 +8,15 @@
             ></GameTimer>
             <span v-show="isWin"> - You win!!!</span>
         </h1>
+
+        <button @click="displayImagePreview">Preview</button>
+        <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
+
         <PuzzleMatrix
                 :imgSrc="imgSrc"
                 :width="width"
                 :height="height"
-                :tilesHorizontal="2"
+                :tilesHorizontal="4"
                 :tilesVertical="3"
                 :offset="20"
                 @win="userWin"
@@ -80,6 +81,10 @@ export default {
     height: 100%;
     margin: 0;
     padding: 0;
+  }
+
+  body {
+      padding: 0 20px;
   }
 
   *,
