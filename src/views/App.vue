@@ -27,6 +27,7 @@
                 :tilesVertical="3"
                 :offset="20"
                 :zoom="zoom"
+                :blurImage="blurImage"
                 @win="userWin"
         ></PuzzleMatrix>
     </div>
@@ -69,6 +70,12 @@ export default {
           // height: 280,
           // imgSrc: 'https://www.shutterstock.com/image-vector/vector-antonyms-opposites-cartoon-characters-260nw-1246528834.jpg',
       }
+    },
+
+    computed: {
+        blurImage() {
+            return this.showPreview;
+        }
     },
 
     methods: {

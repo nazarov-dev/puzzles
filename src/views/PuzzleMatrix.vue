@@ -1,5 +1,5 @@
 <template>
-    <div id="puzzle-container" ref="canvasContainer">
+    <div id="puzzle-container" ref="canvasContainer" :class="{blur: blurImage}">
         <v-stage v-if="image"
                  ref="stage"
                  :config="stageConfig"
@@ -43,6 +43,7 @@
             'offset',
             'imgSrc',
             'zoom',
+            'blurImage',
         ],
 
         data: () => {
@@ -363,5 +364,9 @@
         height: 100vh;
         margin: 0;
         background: #eee;
+    }
+
+    .blur {
+        filter: blur(4px);
     }
 </style>
