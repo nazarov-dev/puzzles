@@ -3,7 +3,6 @@
         <v-stage v-if="image"
                  ref="stage"
                  :config="stageConfig"
-                 :zoom="zoom"
                  @dragstart="handleDragstart"
                  @dragend="handleDragend"
         >
@@ -48,12 +47,8 @@
 
         data: () => {
             return {
-                stageConfig: {
-                    width: 500,
-                    height: 500,
-                    offsetX: -0.5,
-                    offsetY: -0.5,
-                },
+                stageWidth: 500,
+                stageHeight: 500,
 
                 puzzles: {},
                 groups: [],
@@ -63,6 +58,18 @@
         },
 
         computed: {
+            stageConfig() {
+                return {
+                    width: this.stageWidth,
+                    height: this.stageHeight,
+                    offsetX: -0.5,
+                    offsetY: -0.5,
+                    scaleX: this.zoom,
+                    scaleY: this.zoom,
+                    draggable: !!(this.zoom - 1),
+                }
+            },
+
             puzzleSize() {
                 // The size of the Puzzle takes into account the size of the Canvas
 
@@ -71,8 +78,8 @@
                     height = this.height;
 
                 let scale = Math.min(
-                    (this.stageConfig.width - this.offset*2) / width,
-                    (this.stageConfig.height - this.offset*2) / height
+                    (this.stageWidth - this.offset*2) / width,
+                    (this.stageHeight - this.offset*2) / height
                 );
 
                 if (scale < 1) {
@@ -172,10 +179,10 @@
 
             groupPositionLimits() {
                 let xMin = this.offset + this.connectionOffsetX;
-                let xMax = this.stageConfig.width - this.tileWidth - (xMin * 2);
+                let xMax = this.stageWidth - this.tileWidth - (xMin * 2);
 
                 let yMin = this.offset + this.connectionOffsetY;
-                let yMax = this.stageConfig.height - this.tileHeight - (yMin * 2);
+                let yMax = this.stageHeight - this.tileHeight - (yMin * 2);
 
                 return {xMin, xMax, yMin, yMax};
             },
@@ -318,17 +325,8 @@
             updateCanvasSize () {
                 let $container = this.$refs.canvasContainer;
 
-                this.stageConfig.width = $container.offsetWidth;
-                this.stageConfig.height = $container.offsetHeight;
-            },
-
-        },
-
-        watch: {
-            zoom(value) {
-                this.stageConfig.scaleX = value;
-                this.stageConfig.scaleY = value;
-                this.stageConfig.draggable = !!(value - 1);
+                this.stageWidth = $container.offsetWidth;
+                this.stageHeight = $container.offsetHeight;
             },
 
         },
