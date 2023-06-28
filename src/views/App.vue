@@ -1,24 +1,32 @@
 <template>
     <div>
-        <h1>
-            Time:
-            <GameTimer
-                    :prevTime="220"
-                    :stopTimer="stopTimer"
-            ></GameTimer>
-            <span v-show="isWin"> - You win!!!</span>
-        </h1>
+        <header>
+            <h1>
+                Time:
+                <GameTimer
+                        :prevTime="220"
+                        :stopTimer="stopTimer"
+                ></GameTimer>
+                <span v-show="isWin"> - You win!!!</span>
+            </h1>
 
-        <button @click="displayImagePreview">Preview</button>
-        <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
+            <button @click="displayImagePreview">Preview</button>
+            <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
+
+            <ZoomControls
+                    :zoom="zoom"
+                    @setZoom="setZoom"
+            ></ZoomControls>
+        </header>
 
         <PuzzleMatrix
                 :imgSrc="imgSrc"
                 :width="width"
                 :height="height"
-                :tilesHorizontal="4"
+                :tilesHorizontal="2"
                 :tilesVertical="3"
                 :offset="20"
+                :zoom="zoom"
                 @win="userWin"
         ></PuzzleMatrix>
     </div>
@@ -28,10 +36,12 @@
     import PuzzleMatrix from './PuzzleMatrix';
     import GameTimer from "./GameTimer";
     import ImagePreview from "./ImagePreview";
+    import ZoomControls from "./ZoomControls";
 
 export default {
   name: 'App',
   components: {
+      ZoomControls,
       ImagePreview,
       GameTimer,
       PuzzleMatrix,
@@ -42,6 +52,7 @@ export default {
           stopTimer: false,
           isWin: false,
           showPreview: false,
+          zoom: 1,
 
           // horizontal image
           // width: 900,
@@ -70,6 +81,10 @@ export default {
             this.showPreview = !this.showPreview;
         },
 
+        setZoom(value) {
+            this.zoom = value;
+        }
+
     },
 }
 </script>
@@ -83,7 +98,11 @@ export default {
     padding: 0;
   }
 
-  body {
+  header {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
       padding: 0 20px;
   }
 

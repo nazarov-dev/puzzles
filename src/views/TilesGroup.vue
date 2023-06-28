@@ -4,6 +4,7 @@
                 x,
                 y,
                 draggable: true,
+                name: 'TilesGroup',
             }"
             @dragstart="dragStart"
             @dragend="dragEnd"
@@ -13,8 +14,6 @@
                     :path="tile.path"
                     :image="image"
                     :imageScale="imageScale"
-                    :id="tile.id"
-                    :linked="tile.linked"
         ></PuzzleTile>
     </v-group>
 </template>
@@ -51,7 +50,9 @@
                     this.$emit('dragEnd', {x: e.target.x(), y: e.target.y()});
                 });
             },
+
         },
+
     }
 </script>
 

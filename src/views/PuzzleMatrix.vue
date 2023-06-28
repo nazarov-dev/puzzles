@@ -3,6 +3,7 @@
         <v-stage v-if="image"
                  ref="stage"
                  :config="stageConfig"
+                 :zoom="zoom"
                  @dragstart="handleDragstart"
                  @dragend="handleDragend"
         >
@@ -42,13 +43,14 @@
             'height',
             'offset',
             'imgSrc',
+            'zoom',
         ],
 
         data: () => {
             return {
                 stageConfig: {
-                    width: 100,
-                    height: 100,
+                    width: 500,
+                    height: 500,
                     offsetX: -0.5,
                     offsetY: -0.5,
                 },
@@ -116,7 +118,7 @@
             },
 
             stage() {
-                return this.$refs.stage.getNode();
+                return this.$refs.stage?.getNode();
             },
 
             mainLayer() {
@@ -226,18 +228,27 @@
             handleDragstart(evt) {
                 // moving to another layer will improve dragging performance
                 const shape = evt.target;
+
+                // don't do anything with Stage
+                if (shape.name() !== 'TilesGroup') return true;
+
+                // place the drag group to the dragLayer
                 shape.moveTo(this.dragLayer);
                 this.stage.draw();
             },
 
             handleDragend(evt) {
                 const shape = evt.target;
-                shape.moveTo(this.mainLayer);
-                this.stage.draw();
+
+                // don't do anything with Stage
+                if (shape.name() !== 'TilesGroup') return true;
 
                 // set position of draggingGroup
                 this.draggingGroup.x = shape.x();
                 this.draggingGroup.y = shape.y();
+
+                // back the drag group to the mainLayer
+                shape.moveTo(this.mainLayer);
             },
 
             groupDragStart(groupId) {
@@ -283,8 +294,8 @@
                 // offsetX, offsetY: tile offset position in the group
                 const l = this.groupPositionLimits;
 
-                let x = l.xMin + Math.floor(Math.random() * l.xMax) - offsetX;
-                let y = l.yMin + Math.floor(Math.random() * l.yMax) - offsetY;
+                let x = Math.floor(l.xMin + (Math.random() * l.xMax) - offsetX);
+                let y = Math.floor(l.yMin + (Math.random() * l.yMax) - offsetY);
 
                 return {x, y};
             },
@@ -310,12 +321,22 @@
                 this.stageConfig.width = $container.offsetWidth;
                 this.stageConfig.height = $container.offsetHeight;
             },
+
+        },
+
+        watch: {
+            zoom(value) {
+                this.stageConfig.scaleX = value;
+                this.stageConfig.scaleY = value;
+                this.stageConfig.draggable = !!(value - 1);
+            },
+
         },
 
         mounted() {
-            this.updateCanvasSize();
-
             LoadImage((img) => {
+                this.updateCanvasSize();
+
                 this.image = img;
 
                 this.createPuzzles();
@@ -337,9 +358,12 @@
 <style scoped>
     #puzzle-container {
         max-width: 100%;
-        width: 600px;
-        height: 450px;
-        margin: 20px auto;
+        /*width: 600px;*/
+        /*height: 450px;*/
+        /*margin: 20px auto;*/
+        width: 100%;
+        height: 100vh;
+        margin: 0;
         background: #eee;
     }
 </style>
