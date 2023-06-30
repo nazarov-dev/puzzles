@@ -5,6 +5,7 @@
                  :config="stageConfig"
                  @dragstart="handleDragstart"
                  @dragend="handleDragend"
+                 @wheel="zoomWheel"
         >
             <v-layer ref="layer">
                 <TilesGroup v-for="group in orderedGroups"
@@ -27,6 +28,7 @@
 <script>
     import { PuzzlesGenerator } from '../utils/PuzzlesGenerator';
     import LoadImage from '../utils/LoadImage';
+    import EventBus from '../utils/EventBus';
     import TilesGroup from "./TilesGroup";
 
     export default {
@@ -43,6 +45,7 @@
             'offset',
             'imgSrc',
             'zoom',
+            'zoomStep',
             'blurImage',
         ],
 
@@ -50,6 +53,7 @@
             return {
                 stageWidth: 500,
                 stageHeight: 500,
+                isStageDragging: false,
 
                 puzzles: {},
                 groups: [],
@@ -68,6 +72,7 @@
                     scaleX: this.zoom,
                     scaleY: this.zoom,
                     draggable: !!(this.zoom - 1),
+                    dragBoundFunc: this.dragStageBoundFunc,
                 }
             },
 
@@ -234,6 +239,8 @@
             },
 
             handleDragstart(evt) {
+                this.isStageDragging = true;
+
                 // moving to another layer will improve dragging performance
                 const shape = evt.target;
 
@@ -246,6 +253,8 @@
             },
 
             handleDragend(evt) {
+                this.isStageDragging = false;
+
                 const shape = evt.target;
 
                 // don't do anything with Stage
@@ -257,6 +266,70 @@
 
                 // back the drag group to the mainLayer
                 shape.moveTo(this.mainLayer);
+            },
+
+            zoomWheel(e) {
+                if (this.isStageDragging) return false;
+
+                e.evt.preventDefault();
+
+                const pointer = this.stage.getPointerPosition();
+
+                let mousePointTo = {
+                    x: (pointer.x - this.stage.x()) / this.zoom,
+                    y: (pointer.y - this.stage.y()) / this.zoom,
+                };
+
+                // how to scale? Zoom in? Or zoom out?
+                const direction = e.evt.deltaY > 0 ? 1 : -1;
+
+                const newZoom = direction > 0 ? this.zoom - this.zoomStep : this.zoom + this.zoomStep;
+
+                this.setZoom(newZoom);
+
+                // $nextTick for set this.zoom with zoom limits
+                this.$nextTick(() => {
+                    if (newZoom !== this.zoom) return;
+
+                    // new position related to the pointer
+                    let newPos = {
+                        x: pointer.x - mousePointTo.x * this.zoom,
+                        y: pointer.y - mousePointTo.y * this.zoom,
+                    };
+
+                    this.setStagePosition(newPos);
+                });
+            },
+
+            setStagePosition(pos) {
+                // limit new position related to the stage bounds
+                let boundPos = this.dragStageBoundFunc(pos);
+
+                this.stage.position(boundPos);
+            },
+
+            centerOnZoom(oldZoom, newZoom) {
+                const halfWidth = this.stageWidth / 2;
+                const halfHeight = this.stageHeight / 2;
+
+                const x = halfWidth - (halfWidth - this.stage.x()) / oldZoom * newZoom;
+                const y = halfHeight - (halfHeight - this.stage.y()) / oldZoom * newZoom;
+
+                return {x, y};
+            },
+
+            dragStageBoundFunc({x, y}) {
+                const xMin = -this.stageWidth * (this.zoom - 1);
+                const yMin = -this.stageHeight * (this.zoom - 1);
+
+                let newX = Math.min(0, Math.max(x, xMin));
+                let newY = Math.min(0, Math.max(y, yMin));
+
+                return {x: newX, y: newY};
+            },
+
+            setZoom(value) {
+                this.$emit('setZoom', value);
             },
 
             groupDragStart(groupId) {
@@ -332,6 +405,20 @@
 
         },
 
+        beforeCreate() {
+            EventBus.$on('zoomChangedFromControls', (oldZoom) => {
+
+                this.$nextTick(() => {
+                    const newZoom = this.zoom;
+
+                    // get zoomed position related to the center of the Stage
+                    const pos = this.centerOnZoom(oldZoom, newZoom);
+
+                    this.setStagePosition(pos);
+                });
+            });
+        },
+
         mounted() {
             LoadImage((img) => {
                 this.updateCanvasSize();
@@ -349,6 +436,8 @@
 
         beforeDestroy() {
             window.removeEventListener('resize', this.updateCanvasSize, false);
+
+            EventBus.$off('zoomChangedFromControls');
         },
 
     }

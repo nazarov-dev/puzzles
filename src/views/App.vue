@@ -15,7 +15,8 @@
 
             <ZoomControls
                     :zoom="zoom"
-                    @setZoom="setZoom"
+                    :step="zoomStep"
+                    @setZoom="setZoomFromControls"
             ></ZoomControls>
         </header>
 
@@ -27,13 +28,16 @@
                 :tilesVertical="3"
                 :offset="20"
                 :zoom="zoom"
+                :zoomStep="zoomStep"
                 :blurImage="blurImage"
+                @setZoom="setZoom"
                 @win="userWin"
         ></PuzzleMatrix>
     </div>
 </template>
 
 <script>
+    import EventBus from '../utils/EventBus';
     import PuzzleMatrix from './PuzzleMatrix';
     import GameTimer from "./GameTimer";
     import ImagePreview from "./ImagePreview";
@@ -54,6 +58,7 @@ export default {
           isWin: false,
           showPreview: false,
           zoom: 1,
+          zoomStep: 0.5,
 
           // horizontal image
           // width: 900,
@@ -89,8 +94,24 @@ export default {
         },
 
         setZoom(value) {
-            this.zoom = value;
-        }
+            const MIN = 1;
+            const MAX = 3;
+
+            let newValue = Math.max(MIN, Math.min(MAX, value));
+
+            // check changes
+            if (this.zoom === newValue) return;
+
+            this.zoom = newValue;
+        },
+
+        setZoomFromControls(value) {
+            const oldZoom = this.zoom;
+
+            this.setZoom(value);
+
+            EventBus.$emit('zoomChangedFromControls', oldZoom);
+        },
 
     },
 }
