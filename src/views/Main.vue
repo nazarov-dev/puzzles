@@ -16,7 +16,7 @@
             <ZoomControls
                     :zoom="zoom"
                     :step="zoomStep"
-                    @setZoom="setZoomFromControls"
+                    @setZoom="setZoom"
             ></ZoomControls>
         </header>
 
@@ -37,11 +37,10 @@
 </template>
 
 <script>
-    import EventBus from '../utils/EventBus';
-    import PuzzleMatrix from './PuzzleMatrix';
-    import GameTimer from "./GameTimer";
-    import ImagePreview from "./ImagePreview";
-    import ZoomControls from "./ZoomControls";
+    import PuzzleMatrix from '../components/puzzleCanvas/PuzzleMatrix';
+    import GameTimer from "../components/headerControls/GameTimer";
+    import ImagePreview from "../components/headerControls/ImagePreview";
+    import ZoomControls from "../components/headerControls/ZoomControls";
 
 export default {
   name: 'App',
@@ -105,38 +104,10 @@ export default {
             this.zoom = newValue;
         },
 
-        setZoomFromControls(value) {
-            const oldZoom = this.zoom;
-
-            this.setZoom(value);
-
-            EventBus.$emit('zoomChangedFromControls', oldZoom);
-        },
-
     },
 }
 </script>
 
 <style>
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
 
-  header {
-      position: absolute;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      padding: 0 20px;
-  }
-
-  *,
-  :before,
-  :after {
-    box-sizing: border-box;
-  }
 </style>

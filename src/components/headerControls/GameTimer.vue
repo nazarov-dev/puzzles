@@ -1,5 +1,5 @@
 <template>
-    <span>{{hours}} : {{minutes | twoDigits}} : {{seconds | twoDigits}}</span>
+    <span>{{hours}} : {{twoDigits(minutes)}} : {{twoDigits(seconds)}}</span>
 </template>
 
 <script>
@@ -18,13 +18,6 @@
             }
         },
 
-        filters: {
-            twoDigits(val) {
-                return (100 + val).toString().slice(1);
-            },
-
-        },
-
         computed: {
             seconds() {
                 return this.time % 60;
@@ -41,6 +34,10 @@
         },
 
         methods: {
+            twoDigits(val) {
+                return (100 + val).toString().slice(1);
+            },
+
             start() {
                 this.timer = setInterval(() => {
                     this.time++

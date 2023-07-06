@@ -26,9 +26,8 @@
 </template>
 
 <script>
-    import { PuzzlesGenerator } from '../utils/PuzzlesGenerator';
-    import LoadImage from '../utils/LoadImage';
-    import EventBus from '../utils/EventBus';
+    import { PuzzlesGenerator } from '../../utils/PuzzlesGenerator';
+    import LoadImage from '../../utils/LoadImage';
     import TilesGroup from "./TilesGroup";
 
     export default {
@@ -49,11 +48,17 @@
             'blurImage',
         ],
 
+        emits: [
+            'setZoom',
+            'win',
+        ],
+
         data: () => {
             return {
                 stageWidth: 500,
                 stageHeight: 500,
                 isStageDragging: false,
+                isWheeling: false,
 
                 puzzles: {},
                 groups: [],
@@ -273,6 +278,8 @@
 
                 e.evt.preventDefault();
 
+                this.isWheeling = true;
+
                 const pointer = this.stage.getPointerPosition();
 
                 let mousePointTo = {
@@ -299,6 +306,8 @@
 
                     this.setStagePosition(newPos);
                 });
+
+                this.isWheeling = false;
             },
 
             setStagePosition(pos) {
@@ -403,20 +412,18 @@
                 this.stageHeight = $container.offsetHeight;
             },
 
+
+
         },
 
-        beforeCreate() {
-            EventBus.$on('zoomChangedFromControls', (oldZoom) => {
+        watch: {
+            zoom(newValue, oldValue) {
+                if (this.isWheeling) return;
 
-                this.$nextTick(() => {
-                    const newZoom = this.zoom;
+                const pos = this.centerOnZoom(oldValue, newValue);
 
-                    // get zoomed position related to the center of the Stage
-                    const pos = this.centerOnZoom(oldZoom, newZoom);
-
-                    this.setStagePosition(pos);
-                });
-            });
+                this.setStagePosition(pos);
+            },
         },
 
         mounted() {
@@ -434,10 +441,8 @@
             window.addEventListener('resize', this.updateCanvasSize, false);
         },
 
-        beforeDestroy() {
+        beforeUnmount() {
             window.removeEventListener('resize', this.updateCanvasSize, false);
-
-            EventBus.$off('zoomChangedFromControls');
         },
 
     }

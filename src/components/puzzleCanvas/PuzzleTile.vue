@@ -39,7 +39,7 @@
             this.puzzleTile.cache({ pixelRatio: 3 });
         },
 
-        beforeDestroy() {
+        beforeUnmount() {
             this.puzzleTile.clearCache();
         }
 

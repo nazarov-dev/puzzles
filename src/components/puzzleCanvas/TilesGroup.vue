@@ -37,6 +37,11 @@
             'imageScale',
         ],
 
+        emits: [
+            'dragStart',
+            'dragEnd',
+        ],
+
         methods: {
             dragStart() {
                 this.$emit('dragStart', this.id);

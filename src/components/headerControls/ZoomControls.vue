@@ -22,6 +22,10 @@
             },
         },
 
+        emits: [
+            'setZoom',
+        ],
+
         methods: {
             setZoom(value) {
                 this.$emit('setZoom', value);

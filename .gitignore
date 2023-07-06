@@ -1,11 +1,7 @@
 .DS_Store
 node_modules
-#/dist
-/sass/.sass-cache
-Gemfile.lock
-*.css.map
+/dist
 
-package-lock.json
 
 # local env files
 .env.local
