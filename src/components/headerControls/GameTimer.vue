@@ -7,13 +7,12 @@
         name: "GameTimer",
 
         props: [
-            'prevTime',
+            'time',
             'stopTimer',
         ],
 
         data: () => {
             return {
-                time: 0,
                 timer: null,
             }
         },
@@ -40,7 +39,9 @@
 
             start() {
                 this.timer = setInterval(() => {
-                    this.time++
+                    let newTime = this.time + 1;
+
+                    this.$emit('timeChanged', newTime);
                 }, 1000);
             },
 
@@ -61,11 +62,7 @@
             }
         },
 
-        beforeMount() {
-            if (this.prevTime) {
-                this.time = this.prevTime;
-            }
-
+        mounted() {
             this.start();
         }
     }

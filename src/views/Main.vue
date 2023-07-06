@@ -4,8 +4,9 @@
             <h1>
                 Time:
                 <GameTimer
-                        :prevTime="220"
+                        :time="time"
                         :stopTimer="stopTimer"
+                        @timeChanged="setTime"
                 ></GameTimer>
                 <span v-show="isWin"> - You win!!!</span>
             </h1>
@@ -53,6 +54,7 @@ export default {
 
     data: () => {
       return {
+          time: 0,
           stopTimer: false,
           isWin: false,
           showPreview: false,
@@ -90,6 +92,10 @@ export default {
 
         displayImagePreview() {
             this.showPreview = !this.showPreview;
+        },
+
+        setTime(value) {
+            this.time = value;
         },
 
         setZoom(value) {
