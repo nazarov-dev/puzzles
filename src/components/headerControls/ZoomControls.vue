@@ -10,6 +10,10 @@
     export default {
         name: "ZoomControls",
 
+        emits: [
+            'setZoom',
+        ],
+
         props: {
             zoom: {
                 type: Number,
@@ -21,10 +25,6 @@
                 default: 1,
             },
         },
-
-        emits: [
-            'setZoom',
-        ],
 
         methods: {
             setZoom(value) {

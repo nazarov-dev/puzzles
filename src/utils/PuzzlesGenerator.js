@@ -162,8 +162,8 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
         return {top, right, left, bottom};
     };
 
-    this.createPuzzles = () => {
-        const puzzles = {};
+    this.createPuzzles = (puzzles = {}) => {
+        // const puzzles = {};
 
         // generate puzzle tiles matrix (grid)
         for (let v = 0; v < tilesV; v++) {

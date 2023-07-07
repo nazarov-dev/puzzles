@@ -11,17 +11,23 @@
                 <span v-show="isWin"> - You win!!!</span>
             </h1>
 
-            <button @click="displayImagePreview">Preview</button>
-            <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
-
             <ZoomControls
                     :zoom="zoom"
                     :step="zoomStep"
                     @setZoom="setZoom"
             ></ZoomControls>
+
+            <br><br>
+
+            <button @click="saveData">Save</button> |
+
+            <button @click="displayImagePreview">Preview</button>
+            <ImagePreview :imgSrc="imgSrc" :show="showPreview"></ImagePreview>
         </header>
 
         <PuzzleMatrix
+                :userId="userId"
+                :isDataPreload="isDataPreload"
                 :imgSrc="imgSrc"
                 :width="width"
                 :height="height"
@@ -32,12 +38,15 @@
                 :zoomStep="zoomStep"
                 :blurImage="blurImage"
                 @setZoom="setZoom"
+                @setTime="setTime"
                 @win="userWin"
         ></PuzzleMatrix>
     </div>
 </template>
 
 <script>
+    import { groups, puzzles } from '../store/puzzles';
+    import { exportPuzzles } from '../services/PuzzlesService';
     import PuzzleMatrix from '../components/puzzleCanvas/PuzzleMatrix';
     import GameTimer from "../components/headerControls/GameTimer";
     import ImagePreview from "../components/headerControls/ImagePreview";
@@ -52,8 +61,13 @@ export default {
       PuzzleMatrix,
   },
 
-    data: () => {
+    data() {
       return {
+          puzzles,
+          groups,
+
+          userId: null,
+          isDataPreload: false,
           time: 0,
           stopTimer: false,
           isWin: false,
@@ -110,7 +124,34 @@ export default {
             this.zoom = newValue;
         },
 
+        saveData() {
+            let groups = this.groups.map(({id, x, y, tiles}) => {
+
+                // save only id of the grouped tiles
+                let tilesIdArray = tiles.map(tile => tile.id);
+
+                return {
+                    id, x, y,
+                    tilesIdArray,
+                }
+            });
+
+            let dataToSave = {
+                time: this.time,
+                groups,
+            };
+
+            exportPuzzles(/*this.userId,*/ dataToSave);
+        },
+
     },
+
+    beforeMount() {
+      // here we can initialize the data from server on the first load
+
+        this.isDataPreload = window.isDataPreload || false;
+        this.userId = window.userId || 12;
+    }
 }
 </script>
 

@@ -26,17 +26,28 @@
 </template>
 
 <script>
+    import { groups, puzzles } from '../../store/puzzles';
+    import { importPuzzles } from "../../services/PuzzlesService";
     import { PuzzlesGenerator } from '../../utils/PuzzlesGenerator';
     import LoadImage from '../../utils/LoadImage';
     import TilesGroup from "./TilesGroup";
 
     export default {
         name: "PuzzleMatrix",
+
         components: {
             TilesGroup
         },
 
+        emits: [
+            'setZoom',
+            'setTime',
+            'win',
+        ],
+
         props: [
+            'userId',
+            'isDataPreload',
             'tilesHorizontal',
             'tilesVertical',
             'width',
@@ -48,20 +59,15 @@
             'blurImage',
         ],
 
-        emits: [
-            'setZoom',
-            'win',
-        ],
-
-        data: () => {
+        data() {
             return {
                 stageWidth: 500,
                 stageHeight: 500,
                 isStageDragging: false,
                 isWheeling: false,
 
-                puzzles: {},
-                groups: [],
+                puzzles,
+                groups,
                 draggingGroupId: null,
                 image: null,
             }
@@ -377,7 +383,11 @@
                     tileHeight: this.tileHeight,
                 });
 
-                this.puzzles = generator.createPuzzles();
+                // to avoid the repeated items assign to the storage
+                // pass storage puzzles as an argument for more faster work
+                generator.createPuzzles(this.puzzles);
+
+                // this.puzzles = generator.createPuzzles();
             },
 
             makeRandomPosition(offsetX, offsetY) {
@@ -412,8 +422,6 @@
                 this.stageHeight = $container.offsetHeight;
             },
 
-
-
         },
 
         watch: {
@@ -434,8 +442,28 @@
 
                 this.createPuzzles();
 
-                // make a group for each of tiles
-                this.initPuzzleGroups();
+                if (this.isDataPreload) {
+                    importPuzzles(/*this.userId*/).then(data => {
+                        let { time, groups } = data;
+
+                        // set time to the Game Timer
+                        this.$emit('setTime', time);
+
+                        // recover groups data
+                        groups.forEach(({id, x, y, tilesIdArray}, index) => {
+
+                            // recover tiles by id from generated puzzles
+                            let tiles = tilesIdArray.map(id => this.puzzles[id]);
+
+                            this.groups[index] = { id, x, y, tiles };
+                        });
+                    });
+                }
+                else {
+                    // make a group for each of tiles
+                    this.initPuzzleGroups();
+                }
+
             }, this.imgSrc);
 
             window.addEventListener('resize', this.updateCanvasSize, false);

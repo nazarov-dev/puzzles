@@ -11,7 +11,7 @@
             'stopTimer',
         ],
 
-        data: () => {
+        data() {
             return {
                 timer: null,
             }
@@ -38,6 +38,8 @@
             },
 
             start() {
+                this.pause();
+
                 this.timer = setInterval(() => {
                     let newTime = this.time + 1;
 

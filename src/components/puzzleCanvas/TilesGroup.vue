@@ -28,6 +28,11 @@
             PuzzleTile
         },
 
+        emits: [
+            'dragStart',
+            'dragEnd',
+        ],
+
         props: [
             'id',
             'tiles',
@@ -35,11 +40,6 @@
             'y',
             'image',
             'imageScale',
-        ],
-
-        emits: [
-            'dragStart',
-            'dragEnd',
         ],
 
         methods: {
