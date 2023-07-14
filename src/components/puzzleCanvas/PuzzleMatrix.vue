@@ -16,8 +16,6 @@
                             :y="group.y"
                             :image="image"
                             :imageScale="imageScale"
-                            @dragStart="groupDragStart"
-                            @dragEnd="groupDragEnd"
                 ></TilesGroup>
             </v-layer>
             <v-layer ref="dragLayer"></v-layer>
@@ -249,6 +247,21 @@
                 this.groups.push(group);
             },
 
+            checkLinkedTiles({x, y}) {
+                // check distance to linked tile groups
+                let groupsToMerge = this.groupsLinkedToDragged.filter(group => {
+                    const dx = Math.abs(group.x - x);
+                    const dy = Math.abs(group.y - y);
+
+                    return dx <= this.connectionOffsetX && dy <= this.connectionOffsetY;
+                });
+
+                let mergedGroups = this.mergeGroups(groupsToMerge);
+
+                // change groups order by sets a dragged group to the top
+                this.pushGroupToTop(mergedGroups);
+            },
+
             handleDragstart(evt) {
                 this.isStageDragging = true;
 
@@ -257,6 +270,9 @@
 
                 // don't do anything with Stage
                 if (shape.name() !== 'TilesGroup') return true;
+
+                // save an ID of the draggingGroup
+                this.draggingGroupId = shape.id();
 
                 // place the drag group to the dragLayer
                 shape.moveTo(this.dragLayer);
@@ -272,11 +288,19 @@
                 if (shape.name() !== 'TilesGroup') return true;
 
                 // set position of draggingGroup
-                this.draggingGroup.x = shape.x();
-                this.draggingGroup.y = shape.y();
+                const x = shape.x();
+                const y = shape.y();
+
+                this.draggingGroup.x = x;
+                this.draggingGroup.y = y;
 
                 // back the drag group to the mainLayer
                 shape.moveTo(this.mainLayer);
+                
+                // check if shape is near the linked puzzle tiles
+                this.checkLinkedTiles({x, y});
+
+                this.checkGameIsEnd();
             },
 
             zoomWheel(e) {
@@ -323,16 +347,6 @@
                 this.stage.position(boundPos);
             },
 
-            centerOnZoom(oldZoom, newZoom) {
-                const halfWidth = this.stageWidth / 2;
-                const halfHeight = this.stageHeight / 2;
-
-                const x = halfWidth - (halfWidth - this.stage.x()) / oldZoom * newZoom;
-                const y = halfHeight - (halfHeight - this.stage.y()) / oldZoom * newZoom;
-
-                return {x, y};
-            },
-
             dragStageBoundFunc({x, y}) {
                 const xMin = -this.stageWidth * (this.zoom - 1);
                 const yMin = -this.stageHeight * (this.zoom - 1);
@@ -343,30 +357,18 @@
                 return {x: newX, y: newY};
             },
 
+            centerOnZoom(oldZoom, newZoom) {
+                const halfWidth = this.stageWidth / 2;
+                const halfHeight = this.stageHeight / 2;
+
+                const x = halfWidth - (halfWidth - this.stage.x()) / oldZoom * newZoom;
+                const y = halfHeight - (halfHeight - this.stage.y()) / oldZoom * newZoom;
+
+                return {x, y};
+            },
+
             setZoom(value) {
                 this.$emit('setZoom', value);
-            },
-
-            groupDragStart(groupId) {
-                // save an ID of the draggingGroup
-                this.draggingGroupId = groupId;
-            },
-
-            groupDragEnd({x, y}) {
-                // check distance to linked tile groups
-                let groupsToMerge = this.groupsLinkedToDragged.filter(group => {
-                    const dx = Math.abs(group.x - x);
-                    const dy = Math.abs(group.y - y);
-
-                    return dx <= this.connectionOffsetX && dy <= this.connectionOffsetY;
-                });
-
-                let mergedGroups = this.mergeGroups(groupsToMerge);
-
-                // change groups order by sets a dragged group to the top
-                this.pushGroupToTop(mergedGroups);
-
-                this.checkGameIsEnd();
             },
 
             checkGameIsEnd() {

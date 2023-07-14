@@ -1,13 +1,12 @@
 <template>
     <v-group
             :config="{
+                name: 'TilesGroup',
+                id,
                 x,
                 y,
                 draggable: true,
-                name: 'TilesGroup',
             }"
-            @dragstart="dragStart"
-            @dragend="dragEnd"
     >
         <PuzzleTile v-for="tile in tiles"
                     :key="tile.id"
@@ -28,11 +27,6 @@
             PuzzleTile
         },
 
-        emits: [
-            'dragStart',
-            'dragEnd',
-        ],
-
         props: [
             'id',
             'tiles',
@@ -41,22 +35,6 @@
             'image',
             'imageScale',
         ],
-
-        methods: {
-            dragStart() {
-                this.$emit('dragStart', this.id);
-            },
-
-            dragEnd(evt) {
-                const e = evt;
-
-                // use $nextTick to do the Stage dragEnd event first
-                this.$nextTick(() => {
-                    this.$emit('dragEnd', {x: e.target.x(), y: e.target.y()});
-                });
-            },
-
-        },
 
     }
 </script>
