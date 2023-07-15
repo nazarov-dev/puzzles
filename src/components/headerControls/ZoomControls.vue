@@ -7,29 +7,29 @@
 </template>
 
 <script>
+    import { mapState, mapActions } from 'vuex';
+
     export default {
         name: "ZoomControls",
 
-        emits: [
-            'setZoom',
-        ],
-
         props: {
-            zoom: {
-                type: Number,
-                default: 1,
-                required: true,
-            },
             step: {
                 type: Number,
                 default: 1,
             },
         },
 
+        computed: {
+            ...mapState([
+                'zoom',
+            ]),
+
+        },
+
         methods: {
-            setZoom(value) {
-                this.$emit('setZoom', value);
-            },
+            ...mapActions([
+                'setZoom',
+            ]),
 
             zoomDecrease() {
                 let value = this.zoom - this.step;

@@ -1,17 +1,24 @@
 <template>
     <div v-show="show" class="image-container">
-        <img :src="imgSrc" alt="">
+        <img :src="puzzleImageSrc" alt="">
     </div>
 </template>
 
 <script>
+    import {mapState} from 'vuex';
+
     export default {
         name: "ImagePreview",
 
         props: [
-            'imgSrc',
             'show',
-        ]
+        ],
+
+        computed: {
+            ...mapState([
+                'puzzleImageSrc'
+            ]),
+        },
     }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
     <div id="puzzle-container" ref="canvasContainer" :class="{blur: blurImage}">
-        <v-stage v-if="image"
+        <v-stage v-if="puzzleImage"
                  ref="stage"
                  :config="stageConfig"
                  @dragstart="handleDragstart"
@@ -14,7 +14,6 @@
                             :tiles="group.tiles"
                             :x="group.x"
                             :y="group.y"
-                            :image="image"
                             :imageScale="imageScale"
                 ></TilesGroup>
             </v-layer>
@@ -24,10 +23,8 @@
 </template>
 
 <script>
-    import { groups, puzzles } from '../../store/puzzles';
-    import { importPuzzles } from "../../services/PuzzlesService";
+    import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
     import { PuzzlesGenerator } from '../../utils/PuzzlesGenerator';
-    import LoadImage from '../../utils/LoadImage';
     import TilesGroup from "./TilesGroup";
 
     export default {
@@ -38,40 +35,44 @@
         },
 
         emits: [
-            'setZoom',
-            'setTime',
             'win',
         ],
 
         props: [
-            'userId',
-            'isDataPreload',
-            'tilesHorizontal',
-            'tilesVertical',
-            'width',
-            'height',
-            'offset',
-            'imgSrc',
-            'zoom',
             'zoomStep',
             'blurImage',
         ],
 
         data() {
             return {
-                stageWidth: 500,
-                stageHeight: 500,
                 isStageDragging: false,
                 isWheeling: false,
-
-                puzzles,
-                groups,
                 draggingGroupId: null,
-                image: null,
             }
         },
 
         computed: {
+            ...mapState([
+                'isDataRestored',
+                'restorePuzzleGroups',
+                'groups',
+                'puzzles',
+                'puzzleImage',
+                'puzzleWidth',
+                'puzzleHeight',
+                'tilesNumberHorizontal',
+                'tilesNumberVertical',
+                'canvasOffset',
+                'zoom',
+                'stageWidth',
+                'stageHeight',
+            ]),
+
+            ...mapGetters([
+                'getGroupById',
+                'getGroupIndexById',
+            ]),
+
             stageConfig() {
                 return {
                     width: this.stageWidth,
@@ -89,12 +90,12 @@
                 // The size of the Puzzle takes into account the size of the Canvas
 
                 let
-                    width = this.width,
-                    height = this.height;
+                    width = this.puzzleWidth,
+                    height = this.puzzleHeight;
 
                 let scale = Math.min(
-                    (this.stageWidth - this.offset*2) / width,
-                    (this.stageHeight - this.offset*2) / height
+                    (this.stageWidth - this.canvasOffset*2) / width,
+                    (this.stageHeight - this.canvasOffset*2) / height
                 );
 
                 if (scale < 1) {
@@ -113,10 +114,10 @@
 
                 let scale = 1;
 
-                if (this.image) {
+                if (this.puzzleImage) {
                     scale = Math.min(
-                        this.puzzleSize.width / this.image.width,
-                        this.puzzleSize.height / this.image.height
+                        this.puzzleSize.width / this.puzzleImage.width,
+                        this.puzzleSize.height / this.puzzleImage.height
                     );
                 }
 
@@ -124,11 +125,11 @@
             },
 
             tileWidth() {
-                return this.puzzleSize.width / this.tilesHorizontal;
+                return this.puzzleSize.width / this.tilesNumberHorizontal;
             },
 
             tileHeight() {
-                return this.puzzleSize.height / this.tilesVertical;
+                return this.puzzleSize.height / this.tilesNumberVertical;
             },
 
             connectionOffsetX() {
@@ -137,6 +138,10 @@
 
             connectionOffsetY() {
                 return this.tileHeight / 8; // 50% of connector size; connector part have size height: (tileHeight / 4)
+            },
+
+            canvasContainer() {
+                return this.$refs.canvasContainer;
             },
 
             stage() {
@@ -156,16 +161,18 @@
             },
 
             groupsLinkedToDragged() {
-                const group = this.draggingGroup;
+                // get the groups that are neighbors with the tiles of the dragged group
 
-                if (!group) return [];
+                const draggingGroup = this.draggingGroup;
 
-                const groupTilesId = group.tiles.map(tile => tile.id);
+                if (!draggingGroup) return [];
+
+                const groupTilesId = draggingGroup.tiles.map(tile => tile.id);
 
                 const linked = new Set();
 
                 // ID list of linked tiles
-                group.tiles
+                draggingGroup.tiles
                     .forEach(tile => {
                         Object.values(tile.linked)
                             .forEach(val => linked.add(val));
@@ -193,10 +200,12 @@
             },
 
             groupPositionLimits() {
-                let xMin = this.offset + this.connectionOffsetX;
+                // place groups within the canvas stage
+
+                let xMin = this.canvasOffset + this.connectionOffsetX;
                 let xMax = this.stageWidth - this.tileWidth - (xMin * 2);
 
-                let yMin = this.offset + this.connectionOffsetY;
+                let yMin = this.canvasOffset + this.connectionOffsetY;
                 let yMax = this.stageHeight - this.tileHeight - (yMin * 2);
 
                 return {xMin, xMax, yMin, yMax};
@@ -205,35 +214,36 @@
         },
 
         methods: {
-            getGroupIndexById(id) {
-                return this.groups.findIndex(group => group.id === id);
-            },
+            ...mapMutations([
+                'setPuzzles',
+                'setPuzzleGroups',
+            ]),
 
-            getGroupById(id) {
-                return this.groups.find(group => group.id === id);
-            },
-
-            removeGroupFromGroups(group) {
-                const index = this.getGroupIndexById(group.id);
-
-                return this.groups.splice(index, 1)[0];
-            },
+            ...mapActions([
+                'removeGroupById',
+                'pushGroupToTop',
+                'setZoom',
+                'updateCanvasSize',
+            ]),
 
             mergeGroups(groupsToMerge) {
                 // merge draggingGroup and other linked groups to the first found group
-                let draggingGroup = this.removeGroupFromGroups(this.draggingGroup);
+                const draggingGroup = this.draggingGroup;
+
+                this.removeGroupById(draggingGroup.id);
 
                 if (!groupsToMerge.length) return draggingGroup;
 
                 // get first group for merge
-                let firstGroup = groupsToMerge.shift();
+                let mergedGroup = groupsToMerge.shift();
 
                 // remove this first group from groups
-                let mergedGroup = this.removeGroupFromGroups(firstGroup);
+                this.removeGroupById(mergedGroup.id);
 
                 // merge other groups of tiles to the first group
                 groupsToMerge.forEach(group => {
-                    let removedGroup = this.removeGroupFromGroups(group);
+                    let removedGroup = group;
+                    this.removeGroupById(group.id);
 
                     mergedGroup.tiles = [...mergedGroup.tiles, ...removedGroup.tiles];
                 });
@@ -241,10 +251,6 @@
                 mergedGroup.tiles = [...mergedGroup.tiles, ...draggingGroup.tiles];
 
                 return mergedGroup;
-            },
-
-            pushGroupToTop(group) {
-                this.groups.push(group);
             },
 
             checkLinkedTiles({x, y}) {
@@ -322,10 +328,7 @@
 
                 const newZoom = direction > 0 ? this.zoom - this.zoomStep : this.zoom + this.zoomStep;
 
-                this.setZoom(newZoom);
-
-                // $nextTick for set this.zoom with zoom limits
-                this.$nextTick(() => {
+                this.setZoom(newZoom).then(() => {
                     if (newZoom !== this.zoom) return;
 
                     // new position related to the pointer
@@ -367,29 +370,60 @@
                 return {x, y};
             },
 
-            setZoom(value) {
-                this.$emit('setZoom', value);
-            },
-
             checkGameIsEnd() {
                 if (this.groups.length === 1) {
                     this.$emit('win');
                 }
             },
 
+            setGroupsDataAfterInitialization() {
+                let puzzleGroups = [];
+
+                // restore puzzleGroups or create new
+                if(this.isDataRestored) {
+                    puzzleGroups = this.restorePuzzleGroups.map(({id, x, y, tilesIdArray}) => {
+
+                        // recover tiles by id from generated puzzles
+                        let tiles = tilesIdArray.map(id => this.puzzles[id]);
+
+                        return { id, x, y, tiles };
+                    });
+                }
+                else {
+                    for (const [tileId, tile] of Object.entries(this.puzzles)) {
+                        const pos = this.makeRandomPosition(tile.offsetX, tile.offsetY);
+
+                        let group = {
+                            id: tileId, // we can take the same tile id for the group
+                            tiles: [tile],
+                            x: pos.x,
+                            y: pos.y,
+                        };
+
+                        puzzleGroups.push(group);
+                    }
+                }
+
+                this.setPuzzleGroups(puzzleGroups);
+            },
+
             createPuzzles() {
-                const generator = new PuzzlesGenerator({
-                    tilesH: +this.tilesHorizontal,
-                    tilesV: +this.tilesVertical,
+                // generate puzzle tile shapes
+
+                const puzzlesGenerator = new PuzzlesGenerator({
+                    tilesH: +this.tilesNumberHorizontal,
+                    tilesV: +this.tilesNumberVertical,
                     tileWidth: this.tileWidth,
                     tileHeight: this.tileHeight,
                 });
 
-                // to avoid the repeated items assign to the storage
-                // pass storage puzzles as an argument for more faster work
-                generator.createPuzzles(this.puzzles);
+                let puzzles = puzzlesGenerator.createPuzzles();
 
-                // this.puzzles = generator.createPuzzles();
+                // commit puzzles
+                this.setPuzzles(puzzles);
+
+                // set position for new created or restored groups
+                this.setGroupsDataAfterInitialization();
             },
 
             makeRandomPosition(offsetX, offsetY) {
@@ -402,27 +436,6 @@
                 return {x, y};
             },
 
-            initPuzzleGroups() {
-                for (const [tileId, tile] of Object.entries(this.puzzles)) {
-                    let pos = this.makeRandomPosition(tile.offsetX, tile.offsetY);
-
-                    let group = {
-                        id: tileId, // we can take the same tile id for the group
-                        tiles: [tile],
-                        x: pos.x,
-                        y: pos.y,
-                    };
-
-                    this.groups.push(group);
-                }
-            },
-
-            updateCanvasSize () {
-                let $container = this.$refs.canvasContainer;
-
-                this.stageWidth = $container.offsetWidth;
-                this.stageHeight = $container.offsetHeight;
-            },
 
         },
 
@@ -430,6 +443,7 @@
             zoom(newValue, oldValue) {
                 if (this.isWheeling) return;
 
+                // zoom relative to the center when using the zoom buttons on the control panel
                 const pos = this.centerOnZoom(oldValue, newValue);
 
                 this.setStagePosition(pos);
@@ -437,42 +451,9 @@
         },
 
         mounted() {
-            LoadImage((img) => {
-                this.updateCanvasSize();
+            this.updateCanvasSize(this.canvasContainer);
 
-                this.image = img;
-
-                this.createPuzzles();
-
-                if (this.isDataPreload) {
-                    importPuzzles(/*this.userId*/).then(data => {
-                        let { time, groups } = data;
-
-                        // set time to the Game Timer
-                        this.$emit('setTime', time);
-
-                        // recover groups data
-                        groups.forEach(({id, x, y, tilesIdArray}, index) => {
-
-                            // recover tiles by id from generated puzzles
-                            let tiles = tilesIdArray.map(id => this.puzzles[id]);
-
-                            this.groups[index] = { id, x, y, tiles };
-                        });
-                    });
-                }
-                else {
-                    // make a group for each of tiles
-                    this.initPuzzleGroups();
-                }
-
-            }, this.imgSrc);
-
-            window.addEventListener('resize', this.updateCanvasSize, false);
-        },
-
-        beforeUnmount() {
-            window.removeEventListener('resize', this.updateCanvasSize, false);
+            this.createPuzzles();
         },
 
     }

@@ -8,5 +8,22 @@
   </head>
   <body>
     <div id="app"></div>
+
+    <script>
+        window.puzzles = {
+            importData: '', // LZString - the last saved game data from the server
+            urlSave: '', // use in - services/PuzzlesService.js:exportPuzzles(url, dataToSave)
+            imageSrc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
+            puzzleWidth: 1200,
+            puzzleHeight: 1600,
+            tilesNumberHorizontal: 2,
+            tilesNumberVertical: 3,
+            canvasOffset: 20,
+        };
+
+        // for test use data from the localStorage
+        window.puzzles.importData = localStorage.getItem('puzzles');
+    </script>
+
   </body>
 </html>

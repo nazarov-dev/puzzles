@@ -1,23 +1,17 @@
 import LZString from 'lz-string';
 
-export async function importPuzzles(/*userId*/) {
+export function importPuzzles(dataToRestore = {}) {
+    const dataInJSON = LZString.decompress(LZString.decompressFromEncodedURIComponent(dataToRestore));
 
-    // load data from the server
-    let compressedData = localStorage.getItem('puzzles');
-
-    const dataInJSON = LZString.decompress(LZString.decompressFromEncodedURIComponent(compressedData));
-
-    const dataToRestore = JSON.parse(dataInJSON);
-
-    return dataToRestore;
+    return JSON.parse(dataInJSON);
 }
 
-export async function exportPuzzles(/*userId,*/ dataToSave) {
-
+export async function exportPuzzles(url, dataToSave) {
     const dataInJSON = JSON.stringify(dataToSave);
 
-    let compressed = LZString.compressToEncodedURIComponent(LZString.compress(dataInJSON));
+    let dataCompressed = LZString.compressToEncodedURIComponent(LZString.compress(dataInJSON));
 
-    // send data to the server
-    localStorage.setItem('puzzles', compressed)
+    // use an url for send data to the server
+    // for test save data to the localStorage
+    localStorage.setItem('puzzles', dataCompressed)
 }

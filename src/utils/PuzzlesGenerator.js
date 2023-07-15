@@ -117,7 +117,7 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
     // [xPos, yPos] - puzzle tile position on image
     // {top, right, left, bottom} - take a tile side from previous tile
     // for the right side of current tile set the "left" from previous tile is it exist
-    this.tile = ([xPos, yPos], { top = null, right = null, left = null, bottom = null }) => {
+    this.createTile = ([xPos, yPos], { top = null, right = null, left = null, bottom = null }) => {
         offsetX = xPos;
         offsetY = yPos;
         let path = '';
@@ -162,8 +162,8 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
         return {top, right, left, bottom};
     };
 
-    this.createPuzzles = (puzzles = {}) => {
-        // const puzzles = {};
+    this.createPuzzles = () => {
+        const puzzles = {};
 
         // generate puzzle tiles matrix (grid)
         for (let v = 0; v < tilesV; v++) {
@@ -177,7 +177,7 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
                 let tileSides = this.createTileSides({prevV, prevH, v, h});
 
                 // create puzzle tile item
-                let tile = this.tile([x, y], tileSides);
+                let tile = this.createTile([x, y], tileSides);
 
                 // set tile id
                 let tileId = this.makeTileId(v, h);

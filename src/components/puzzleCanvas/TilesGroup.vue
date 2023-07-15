@@ -11,7 +11,6 @@
         <PuzzleTile v-for="tile in tiles"
                     :key="tile.id"
                     :path="tile.path"
-                    :image="image"
                     :imageScale="imageScale"
         ></PuzzleTile>
     </v-group>
@@ -32,7 +31,6 @@
             'tiles',
             'x',
             'y',
-            'image',
             'imageScale',
         ],
 

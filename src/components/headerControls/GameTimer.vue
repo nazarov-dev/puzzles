@@ -3,11 +3,12 @@
 </template>
 
 <script>
+    import { mapState, mapActions } from 'vuex';
+
     export default {
         name: "GameTimer",
 
         props: [
-            'time',
             'stopTimer',
         ],
 
@@ -18,6 +19,10 @@
         },
 
         computed: {
+            ...mapState([
+                'time',
+            ]),
+
             seconds() {
                 return this.time % 60;
             },
@@ -33,6 +38,10 @@
         },
 
         methods: {
+            ...mapActions([
+                'setTime',
+            ]),
+
             twoDigits(val) {
                 return (100 + val).toString().slice(1);
             },
@@ -43,7 +52,7 @@
                 this.timer = setInterval(() => {
                     let newTime = this.time + 1;
 
-                    this.$emit('timeChanged', newTime);
+                    this.setTime(newTime);
                 }, 1000);
             },
 

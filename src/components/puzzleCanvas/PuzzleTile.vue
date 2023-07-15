@@ -4,9 +4,8 @@
             :config="{
                 data: path,
                 strokeWidth: 1,
-                // strokeScaleEnabled: false, // not work with cache + drag&drop
                 stroke: 'black',
-                fillPatternImage: image,
+                fillPatternImage: puzzleImage,
                 fillPatternScaleX: imageScale,
                 fillPatternScaleY: imageScale,
                 fillPatternRepeat: 'no-repeat',
@@ -19,16 +18,21 @@
 </template>
 
 <script>
+    import { mapState } from 'vuex';
+
     export default {
         name: "PuzzleTile",
 
         props: [
             'path',
-            'image',
             'imageScale',
         ],
 
         computed: {
+            ...mapState([
+                'puzzleImage',
+            ]),
+
             puzzleTile() {
                 return this.$refs['puzzleTile'].getNode();
             },
