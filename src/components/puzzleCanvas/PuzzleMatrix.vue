@@ -4,6 +4,7 @@
                  ref="stage"
                  :config="stageConfig"
                  @dragstart="handleDragstart"
+                 @dragmove="handleDragmove"
                  @dragend="handleDragend"
                  @touchmove="zoomTouch"
                  @touchend="zoomTouchEnd"
@@ -47,7 +48,6 @@
 
         data() {
             return {
-                isDragging: false,
                 isWheeling: false,
                 draggingGroupId: null,
                 zoomTouchLastCenter: null,
@@ -273,29 +273,38 @@
             },
 
             handleDragstart(evt) {
-                
-                // check if anything is currently dragging
-                if (this.isDragging) return false;
-
-                this.isDragging = true;
-
-                // moving to another layer will improve dragging performance
                 const shape = evt.target;
 
                 // don't do anything with Stage
                 if (shape.name() !== 'TilesGroup') return true;
 
-                // save an ID of the draggingGroup
-                this.draggingGroupId = shape.id();
+                const shapeId = shape.id();
 
+                // check if anything is currently dragging
+                if (shapeId === this.draggingGroupId) return false;
+
+                // save an ID of the draggingGroup
+                this.draggingGroupId = shapeId;
+
+                // moving to another layer will improve dragging performance
                 // place the drag group to the dragLayer
                 shape.moveTo(this.dragLayer);
                 this.stage.draw();
             },
 
-            handleDragend(evt) {
-                this.isDragging = false;
+            handleDragmove(evt) {
+                const shape = evt.target;
 
+                // don't do anything with Stage
+                if (shape.name() !== 'TilesGroup') return true;
+
+                const shapeId = shape.id();
+
+                // check if anything is currently dragging
+                if (shapeId === this.draggingGroupId) return false;
+            },
+
+            handleDragend(evt) {
                 const shape = evt.target;
 
                 // don't do anything with Stage
@@ -315,6 +324,8 @@
                 this.checkLinkedTiles({x, y});
 
                 this.checkGameIsEnd();
+
+                this.draggingGroupId = null;
             },
 
             getDistance(p1, p2) {
@@ -390,6 +401,8 @@
 
                     this.zoomTouchLastDist = dist;
                     this.zoomTouchLastCenter = newCenter;
+
+                    return false;
                 }
             },
 
@@ -399,7 +412,7 @@
             },
 
             zoomWheel(e) {
-                if (this.isDragging) return false;
+                if (this.draggingGroupId || this.stage.isDragging()) return false;
 
                 e.evt.preventDefault();
 

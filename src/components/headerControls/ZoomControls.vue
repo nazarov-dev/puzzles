@@ -1,13 +1,14 @@
 <template>
     <span class="">
         <button @click="zoomDecrease">Zoom -</button>
-        {{ zoom }}
+        {{ roundedZoom }}
         <button @click="zoomIncrease">Zoom +</button>
     </span>
 </template>
 
 <script>
     import { mapState, mapActions } from 'vuex';
+    import { roundNumbetTo2Digits } from '../../utils/MyMath';
 
     export default {
         name: "ZoomControls",
@@ -23,6 +24,10 @@
             ...mapState([
                 'zoom',
             ]),
+
+            roundedZoom() {
+                return roundNumbetTo2Digits(this.zoom);
+            },
 
         },
 
