@@ -45,7 +45,7 @@
 
         data() {
             return {
-                isStageDragging: false,
+                isDragging: false,
                 isWheeling: false,
                 draggingGroupId: null,
             }
@@ -269,7 +269,11 @@
             },
 
             handleDragstart(evt) {
-                this.isStageDragging = true;
+                
+                // check if anything is currently dragging
+                if (this.isDragging) return false;
+
+                this.isDragging = true;
 
                 // moving to another layer will improve dragging performance
                 const shape = evt.target;
@@ -286,7 +290,7 @@
             },
 
             handleDragend(evt) {
-                this.isStageDragging = false;
+                this.isDragging = false;
 
                 const shape = evt.target;
 
@@ -310,7 +314,7 @@
             },
 
             zoomWheel(e) {
-                if (this.isStageDragging) return false;
+                if (this.isDragging) return false;
 
                 e.evt.preventDefault();
 
