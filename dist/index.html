@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Puzzles</title><script defer="defer" src="/js/chunk-vendors.js"></script><script defer="defer" src="/js/app.js"></script><link href="/css/app.css" rel="stylesheet"></head><body><div id="app"></div><script>window.puzzles = {
+            importData: '', // LZString - the last saved game data from the server
+            urlSave: '', // use in - services/PuzzlesService.js:exportPuzzles(url, dataToSave)
+            imageSrc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
+            puzzleWidth: 1200,
+            puzzleHeight: 1600,
+            tilesNumberHorizontal: 2,
+            tilesNumberVertical: 3,
+            canvasOffset: 20,
+        };
+
+        // for test use data from the localStorage
+        window.puzzles.importData = localStorage.getItem('puzzles');</script></body></html>
