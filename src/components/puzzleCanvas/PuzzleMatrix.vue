@@ -5,6 +5,8 @@
                  :config="stageConfig"
                  @dragstart="handleDragstart"
                  @dragend="handleDragend"
+                 @touchmove="zoomTouch"
+                 @touchend="zoomTouchEnd"
                  @wheel="zoomWheel"
         >
             <v-layer ref="layer">
@@ -48,6 +50,8 @@
                 isDragging: false,
                 isWheeling: false,
                 draggingGroupId: null,
+                zoomTouchLastCenter: null,
+                zoomTouchLastDist: 0,
             }
         },
 
@@ -313,6 +317,87 @@
                 this.checkGameIsEnd();
             },
 
+            getDistance(p1, p2) {
+                return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+            },
+
+            getCenter(p1, p2) {
+                return {
+                    x: (p1.x + p2.x) / 2,
+                    y: (p1.y + p2.y) / 2,
+                };
+            },
+
+            zoomTouch(e) {
+                const touch1 = e.evt.touches[0];
+                const touch2 = e.evt.touches[1];
+
+                if (touch1 && touch2) {
+                    e.evt.preventDefault();
+
+                    // if the stage was under Konva's drag&drop
+                    // we need to stop it, and implement our own pan logic with two pointers
+                    if (this.stage.isDragging()) {
+                        this.stage.stopDrag();
+                    }
+
+                    let p1 = {
+                        x: touch1.clientX,
+                        y: touch1.clientY,
+                    };
+                    let p2 = {
+                        x: touch2.clientX,
+                        y: touch2.clientY,
+                    };
+
+                    if (!this.zoomTouchLastCenter) {
+                        this.zoomTouchLastCenter = this.getCenter(p1, p2);
+                        return;
+                    }
+
+                    let newCenter = this.getCenter(p1, p2);
+
+                    let dist = this.getDistance(p1, p2);
+
+                    if (!this.zoomTouchLastDist) {
+                        this.zoomTouchLastDist = dist;
+                    }
+
+                    // local coordinates of center point
+                    const oldZoom = this.zoom;
+
+                    let pointTo = {
+                        x: (newCenter.x - this.stage.x()) / oldZoom,
+                        y: (newCenter.y - this.stage.y()) / oldZoom,
+                    };
+
+                    let zoom = oldZoom * (dist / this.zoomTouchLastDist);
+
+                    // calculate new position of the stage
+                    let dx = newCenter.x - this.zoomTouchLastCenter.x;
+                    let dy = newCenter.y - this.zoomTouchLastCenter.y;
+
+                    let newPos = {
+                        x: newCenter.x - pointTo.x * zoom + dx,
+                        y: newCenter.y - pointTo.y * zoom + dy,
+                    };
+
+                    this.setZoom(zoom).then(() => {
+                        if (zoom !== this.zoom) return;
+
+                        this.setStagePosition(newPos);
+                    });
+
+                    this.zoomTouchLastDist = dist;
+                    this.zoomTouchLastCenter = newCenter;
+                }
+            },
+
+            zoomTouchEnd() {
+                this.zoomTouchLastDist = 0;
+                this.zoomTouchLastCenter = null;
+            },
+
             zoomWheel(e) {
                 if (this.isDragging) return false;
 
@@ -332,14 +417,14 @@
 
                 const newZoom = direction > 0 ? this.zoom - this.zoomStep : this.zoom + this.zoomStep;
 
+                // new position related to the pointer
+                let newPos = {
+                    x: pointer.x - mousePointTo.x * newZoom,
+                    y: pointer.y - mousePointTo.y * newZoom,
+                };
+
                 this.setZoom(newZoom).then(() => {
                     if (newZoom !== this.zoom) return;
-
-                    // new position related to the pointer
-                    let newPos = {
-                        x: pointer.x - mousePointTo.x * this.zoom,
-                        y: pointer.y - mousePointTo.y * this.zoom,
-                    };
 
                     this.setStagePosition(newPos);
                 });
