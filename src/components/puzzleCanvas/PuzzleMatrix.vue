@@ -4,7 +4,6 @@
                  ref="stage"
                  :config="stageConfig"
                  @dragstart="handleDragstart"
-                 @dragmove="handleDragmove"
                  @dragend="handleDragend"
                  @touchmove="zoomTouch"
                  @touchend="zoomTouchEnd"
@@ -281,7 +280,10 @@
                 const shapeId = shape.id();
 
                 // check if anything is currently dragging
-                if (shapeId === this.draggingGroupId) return false;
+                if (this.draggingGroupId) {
+                    shape.stopDrag();
+                    return false;
+                }
 
                 // save an ID of the draggingGroup
                 this.draggingGroupId = shapeId;
@@ -290,18 +292,6 @@
                 // place the drag group to the dragLayer
                 shape.moveTo(this.dragLayer);
                 this.stage.draw();
-            },
-
-            handleDragmove(evt) {
-                const shape = evt.target;
-
-                // don't do anything with Stage
-                if (shape.name() !== 'TilesGroup') return true;
-
-                const shapeId = shape.id();
-
-                // check if anything is currently dragging
-                if (shapeId === this.draggingGroupId) return false;
             },
 
             handleDragend(evt) {
@@ -328,11 +318,11 @@
                 this.draggingGroupId = null;
             },
 
-            getDistance(p1, p2) {
+            getTouchDistance(p1, p2) {
                 return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
             },
 
-            getCenter(p1, p2) {
+            getTouchCenter(p1, p2) {
                 return {
                     x: (p1.x + p2.x) / 2,
                     y: (p1.y + p2.y) / 2,
@@ -352,6 +342,13 @@
                         this.stage.stopDrag();
                     }
 
+                    // if any group was drag&drop we need to stop it
+                    if (this.draggingGroupId) {
+                        let draggingGroup = this.stage.findOne('#' + this.draggingGroupId);
+
+                        draggingGroup.stopDrag();
+                    }
+
                     let p1 = {
                         x: touch1.clientX,
                         y: touch1.clientY,
@@ -362,13 +359,13 @@
                     };
 
                     if (!this.zoomTouchLastCenter) {
-                        this.zoomTouchLastCenter = this.getCenter(p1, p2);
+                        this.zoomTouchLastCenter = this.getTouchCenter(p1, p2);
                         return;
                     }
 
-                    let newCenter = this.getCenter(p1, p2);
+                    let newCenter = this.getTouchCenter(p1, p2);
 
-                    let dist = this.getDistance(p1, p2);
+                    let dist = this.getTouchDistance(p1, p2);
 
                     if (!this.zoomTouchLastDist) {
                         this.zoomTouchLastDist = dist;
