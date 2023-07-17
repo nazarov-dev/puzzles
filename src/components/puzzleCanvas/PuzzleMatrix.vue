@@ -1,6 +1,6 @@
 <template>
     <div id="puzzle-container" ref="canvasContainer" :class="{blur: blurImage}">
-        <v-stage v-if="puzzleImage"
+        <v-stage
                  ref="stage"
                  :config="stageConfig"
                  @dragstart="handleDragstart"
@@ -16,7 +16,7 @@
                             :tiles="group.tiles"
                             :x="group.x"
                             :y="group.y"
-                            :imageScale="imageScale"
+                            :imageScale="puzzleSize.scale"
                 ></TilesGroup>
             </v-layer>
             <v-layer ref="dragLayer"></v-layer>
@@ -61,7 +61,6 @@
                 'puzzleTilesFlip',
                 'groups',
                 'puzzles',
-                'puzzleImage',
                 'puzzleWidth',
                 'puzzleHeight',
                 'tilesNumberHorizontal',
@@ -110,22 +109,8 @@
                 return {
                     width,
                     height,
+                    scale,
                 }
-            },
-
-            imageScale() {
-                // The size of the loaded Image takes into account the size of the Puzzle
-
-                let scale = 1;
-
-                if (this.puzzleImage) {
-                    scale = Math.min(
-                        this.puzzleSize.width / this.puzzleImage.width,
-                        this.puzzleSize.height / this.puzzleImage.height
-                    );
-                }
-
-                return scale;
             },
 
             tileWidth() {

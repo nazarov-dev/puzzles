@@ -18,7 +18,7 @@
             <ImagePreview :show="showPreview"></ImagePreview>
         </header>
 
-        <PuzzleMatrix
+        <PuzzleMatrix v-if="puzzleImage"
                 :zoomStep="zoomStep"
                 :blurImage="blurImage"
                 @win="userWin"
@@ -54,10 +54,7 @@ export default {
 
     computed: {
         ...mapState([
-            'puzzles',
             'puzzleImage',
-            'zoom',
-            'time',
         ]),
 
         blurImage() {

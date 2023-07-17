@@ -119,8 +119,6 @@ export const store = createStore({
             const isDataRestored = !!data.importData;
             const urlSave = data.urlSave || '';
             const puzzleImageSrc = data.imageSrc || '';
-            const puzzleWidth = +data.puzzleWidth || 0;
-            const puzzleHeight = +data.puzzleHeight || 0;
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
             const tilesNumberVertical = +data.tilesNumberVertical || 0;
             const canvasOffset = +data.canvasOffset || 0;
@@ -129,8 +127,6 @@ export const store = createStore({
             commit('setIsDataRestored', isDataRestored);
             commit('setUrlSave', urlSave);
             commit('setPuzzleImageSrc', puzzleImageSrc);
-            commit('setPuzzleWidth', puzzleWidth);
-            commit('setPuzzleHeight', puzzleHeight);
             commit('setPuzzleTilesNumberHorizontal', tilesNumberHorizontal);
             commit('setPuzzleTilesNumberVertical', tilesNumberVertical);
             commit('setCanvasOffset', canvasOffset);
@@ -147,7 +143,14 @@ export const store = createStore({
 
             // load puzzle image
             LoadImage(image => {
-                commit('setPuzzleImage', image)
+                if (!image) throw new Error(`Image file not found: ${puzzleImageSrc}`);
+
+                const puzzleWidth = image.naturalWidth;
+                const puzzleHeight = image.naturalHeight;
+
+                commit('setPuzzleWidth', puzzleWidth);
+                commit('setPuzzleHeight', puzzleHeight);
+                commit('setPuzzleImage', image);
             }, puzzleImageSrc);
         },
 
