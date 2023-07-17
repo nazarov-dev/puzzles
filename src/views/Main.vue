@@ -12,6 +12,7 @@
             <br><br>
 
             <button v-show="!isWin" @click="saveData">Save</button> |
+            <button @click="reset">Reset</button> |
 
             <button @click="displayImagePreview">Preview</button>
             <ImagePreview :show="showPreview"></ImagePreview>
@@ -68,6 +69,7 @@ export default {
         ...mapActions([
             'initApp',
             'saveData',
+            'resetData',
         ]),
 
         userWin() {
@@ -77,6 +79,14 @@ export default {
 
         displayImagePreview() {
             this.showPreview = !this.showPreview;
+        },
+
+        reset() {
+            // reset saved data in localStorage
+            this.resetData();
+
+            // reload the page
+            location.reload();
         },
 
     },

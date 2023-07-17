@@ -203,5 +203,9 @@ export const store = createStore({
             exportPuzzles(url, dataToSave);
         },
 
+        resetData() {
+            localStorage.removeItem('puzzles');
+        },
+
     }
 });
