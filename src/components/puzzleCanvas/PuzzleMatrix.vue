@@ -58,6 +58,7 @@
             ...mapState([
                 'isDataRestored',
                 'restorePuzzleGroups',
+                'puzzleTilesFlip',
                 'groups',
                 'puzzles',
                 'puzzleImage',
@@ -220,6 +221,7 @@
             ...mapMutations([
                 'setPuzzles',
                 'setPuzzleGroups',
+                'setPuzzleTilesFlip',
             ]),
 
             ...mapActions([
@@ -514,9 +516,14 @@
                     tilesV: +this.tilesNumberVertical,
                     tileWidth: this.tileWidth,
                     tileHeight: this.tileHeight,
+                    tilesFlip: this.puzzleTilesFlip,
                 });
 
                 let puzzles = puzzlesGenerator.createPuzzles();
+
+                // save flip of the puzzle tiles
+                const tilesFlip = puzzlesGenerator.getTilesFlip();
+                this.setPuzzleTilesFlip(tilesFlip);
 
                 // commit puzzles
                 this.setPuzzles(puzzles);

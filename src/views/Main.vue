@@ -87,10 +87,11 @@ export default {
         let importData = window.puzzles.importData;
 
         if (importData) {
-            let { time, groups } = importPuzzles(importData);
+            let { time, groups, tilesFlip } = importPuzzles(importData);
 
             window.puzzles.time = time;
             window.puzzles.groups = groups;
+            window.puzzles.tilesFlip = tilesFlip;
         }
 
         this.initApp(window.puzzles);

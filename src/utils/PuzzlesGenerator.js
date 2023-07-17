@@ -1,10 +1,13 @@
 import { roundNumbetTo2Digits, twoDigitsStr } from './MyMath';
 
-export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHeight = 20}) {
+export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHeight = 20, tilesFlip = []}) {
     const tabSize = (20 / 200); // tiles connection shape size
     const jitter = (4 / 100);
     let seed = Math.random() * 10000;
     let a, b, c, d, e, flip;
+
+    const isRestore = tilesFlip.length;
+    let iFlip = 0;
 
     let offsetX = 0;
     let offsetY = 0;
@@ -61,10 +64,18 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
     const w8 = () => w(e);
     const w9 = () => w(0); // h=0, v=1
 
-
     const next = () => {
         let flipold = flip;
-        flip = randomBool();
+
+        if (isRestore) {
+            flip = tilesFlip[iFlip++];
+        }
+        else {
+            flip = +randomBool();
+            tilesFlip.push(flip);
+        }
+
+        e = uniform(-jitter, jitter);
 
         a = (flip == flipold ? -e: e);
         b = uniform(-jitter, jitter);
@@ -73,19 +84,18 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
         e = uniform(-jitter, jitter);
     };
 
-    const first = () => {
-        e = uniform(-jitter, jitter);
-        next();
-    };
-
     const setPos = (xPos, yPos) => {
         x = xPos;
         y = yPos;
     };
 
+    this.getTilesFlip = () => {
+        return tilesFlip;
+    };
+
     this.horizontal = () => {
         isVertical = false;
-        first();
+        next();
 
         let arr = [];
 
@@ -98,7 +108,7 @@ export function PuzzlesGenerator({tilesH = 1, tilesV = 1, tileWidth = 20, tileHe
 
     this.vertical = () => {
         isVertical = true;
-        first();
+        next();
 
         let arr = [];
 

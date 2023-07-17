@@ -7,6 +7,7 @@ export const store = createStore({
         return {
             isDataRestored: false,
             restorePuzzleGroups: [],
+            puzzleTilesFlip: [],
             urlSave: '',
             time: 0,
             zoom: 1,
@@ -43,6 +44,10 @@ export const store = createStore({
             state.restorePuzzleGroups = groups;
         },
 
+        setPuzzleTilesFlip(state, tilesFlip) {
+            state.puzzleTilesFlip = tilesFlip;
+        },
+
         setTime(state, time) {
             state.time = +time;
         },
@@ -50,7 +55,7 @@ export const store = createStore({
         setZoom(state, zoom) {
             state.zoom = +zoom;
         },
-        
+
         setUrlSave(state, url) {
             state.urlSave = url;
         },
@@ -66,11 +71,11 @@ export const store = createStore({
         setPuzzleImageSrc(state, src) {
             state.puzzleImageSrc = src;
         },
-        
+
         setPuzzleImage(state, image) {
             state.puzzleImage = image;
         },
-        
+
         setPuzzleWidth(state, width) {
             state.puzzleWidth = +width;
         },
@@ -106,7 +111,7 @@ export const store = createStore({
         setStageHeight(state, height) {
             state.stageHeight = +height;
         },
-        
+
     },
 
     actions: {
@@ -132,9 +137,11 @@ export const store = createStore({
 
             if (isDataRestored) {
                 const restorePuzzleGroups = data.groups || [];
+                const puzzleTilesFlip = data.tilesFlip || [];
                 const time = +data.time || 0;
 
                 commit('setRestorePuzzleGroups', restorePuzzleGroups);
+                commit('setPuzzleTilesFlip', puzzleTilesFlip);
                 dispatch('setTime', time);
             }
 
@@ -189,6 +196,7 @@ export const store = createStore({
             let dataToSave = {
                 time: state.time,
                 groups,
+                tilesFlip: state.puzzleTilesFlip
             };
 
             // send data to the server
