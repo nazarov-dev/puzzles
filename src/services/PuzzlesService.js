@@ -1,3 +1,4 @@
+import axios from 'axios';
 import LZString from 'lz-string';
 
 export function importPuzzles(dataToRestore = {}) {
@@ -13,5 +14,16 @@ export async function exportPuzzles(url, dataToSave) {
 
     // use an url for send data to the server
     // for test save data to the localStorage
-    localStorage.setItem('puzzles', dataCompressed)
+    if (url) {
+        axios.post(url, dataCompressed)
+            .then(function (response) {
+                console.log(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    else {
+        localStorage.setItem('puzzles', dataCompressed);
+    }
 }
