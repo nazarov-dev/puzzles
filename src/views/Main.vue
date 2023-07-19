@@ -7,40 +7,47 @@
                 <span v-show="isWin"> - You win!!!</span>
             </h1>
 
-            <ZoomControls :step="zoomStep"></ZoomControls>
+            <div v-if="puzzleImage">
+                <ZoomControls :step="zoomStep"></ZoomControls>
 
-            <br><br>
+                <br><br>
 
-            <button v-show="!isWin" @click="saveData">Save</button> |
-            <button @click="reset">Reset</button> |
+                <button v-show="!isWin" @click="saveData">Save</button> |
+                <button @click="reset">Reset</button> |
 
-            <button @click="displayImagePreview">Preview</button>
-            <ImagePreview :show="showPreview"></ImagePreview>
+                <button @click="displayImagePreview">Preview</button>
+                <ImagePreview :show="showPreview"></ImagePreview>
+            </div>
         </header>
 
-        <PuzzleMatrix v-if="puzzleImage"
-                :zoomStep="zoomStep"
-                :blurImage="blurImage"
-                @win="userWin"
-        ></PuzzleMatrix>
+        <div id="puzzle-container" ref="canvasContainer" :class="{blur: blurImage}">
+            <Puzzles v-if="puzzleImage"
+                     :zoomStep="zoomStep"
+                     :blurImage="blurImage"
+                     @win="userWin"
+            ></Puzzles>
+            <LoadSpinner v-else></LoadSpinner>
+        </div>
     </div>
 </template>
 
 <script>
     import { mapState, mapActions } from 'vuex';
     import { importPuzzles } from "../services/PuzzlesService";
-    import PuzzleMatrix from '../components/puzzleCanvas/PuzzleMatrix';
+    import Puzzles from '../components/puzzleCanvas/Puzzles';
     import GameTimer from "../components/headerControls/GameTimer";
     import ImagePreview from "../components/headerControls/ImagePreview";
     import ZoomControls from "../components/headerControls/ZoomControls";
+    import LoadSpinner from "../components/puzzleCanvas/LoadSpinner";
 
 export default {
   name: 'App',
   components: {
-      ZoomControls,
-      ImagePreview,
+      Puzzles,
       GameTimer,
-      PuzzleMatrix,
+      ImagePreview,
+      ZoomControls,
+      LoadSpinner,
   },
 
     data() {
@@ -67,6 +74,7 @@ export default {
             'initApp',
             'saveData',
             'resetData',
+            'updateCanvasSize',
         ]),
 
         userWin() {
@@ -88,6 +96,11 @@ export default {
 
     },
 
+    mounted() {
+        const canvasContainer = this.$refs.canvasContainer;
+        this.updateCanvasSize(canvasContainer);
+    },
+
     beforeMount() {
       // here we can initialize the data from server on the first load
 
@@ -106,6 +119,19 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+    #puzzle-container {
+        max-width: 100%;
+        /*width: 600px;*/
+        /*height: 450px;*/
+        /*margin: 20px auto;*/
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        background: #eee;
+    }
 
+    .blur {
+        filter: blur(4px);
+    }
 </style>

@@ -1,27 +1,25 @@
 <template>
-    <div id="puzzle-container" ref="canvasContainer" :class="{blur: blurImage}">
-        <v-stage
-                 ref="stage"
-                 :config="stageConfig"
-                 @dragstart="handleDragstart"
-                 @dragend="handleDragend"
-                 @touchmove="zoomTouch"
-                 @touchend="zoomTouchEnd"
-                 @wheel="zoomWheel"
-        >
-            <v-layer ref="layer">
-                <TilesGroup v-for="group in orderedGroups"
-                            :key="group.id"
-                            :id="group.id"
-                            :tiles="group.tiles"
-                            :x="group.x"
-                            :y="group.y"
-                            :imageScale="puzzleSize.scale"
-                ></TilesGroup>
-            </v-layer>
-            <v-layer ref="dragLayer"></v-layer>
-        </v-stage>
-    </div>
+    <v-stage
+            ref="stage"
+            :config="stageConfig"
+            @dragstart="handleDragstart"
+            @dragend="handleDragend"
+            @touchmove="zoomTouch"
+            @touchend="zoomTouchEnd"
+            @wheel="zoomWheel"
+    >
+        <v-layer ref="layer">
+            <TilesGroup v-for="group in orderedGroups"
+                        :key="group.id"
+                        :id="group.id"
+                        :tiles="group.tiles"
+                        :x="group.x"
+                        :y="group.y"
+                        :imageScale="puzzleSize.scale"
+            ></TilesGroup>
+        </v-layer>
+        <v-layer ref="dragLayer"></v-layer>
+    </v-stage>
 </template>
 
 <script>
@@ -30,7 +28,7 @@
     import TilesGroup from "./TilesGroup";
 
     export default {
-        name: "PuzzleMatrix",
+        name: "Puzzles",
 
         components: {
             TilesGroup
@@ -129,10 +127,6 @@
                 return this.tileHeight / 8; // 50% of connector size; connector part have size height: (tileHeight / 4)
             },
 
-            canvasContainer() {
-                return this.$refs.canvasContainer;
-            },
-
             stage() {
                 return this.$refs.stage?.getNode();
             },
@@ -213,7 +207,6 @@
                 'removeGroupById',
                 'pushGroupToTop',
                 'setZoom',
-                'updateCanvasSize',
             ]),
 
             mergeGroups(groupsToMerge) {
@@ -542,8 +535,6 @@
         },
 
         mounted() {
-            this.updateCanvasSize(this.canvasContainer);
-
             this.createPuzzles();
         },
 
@@ -551,18 +542,5 @@
 </script>
 
 <style scoped>
-    #puzzle-container {
-        max-width: 100%;
-        /*width: 600px;*/
-        /*height: 450px;*/
-        /*margin: 20px auto;*/
-        width: 100%;
-        height: 100vh;
-        margin: 0;
-        background: #eee;
-    }
 
-    .blur {
-        filter: blur(4px);
-    }
 </style>
