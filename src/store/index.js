@@ -123,7 +123,7 @@ export const store = createStore({
     },
 
     actions: {
-        initApp({commit, dispatch}, data) {
+        initApp({commit}, data) {
             const isDataRestored = !!data.importData;
             const urlSave = data.urlSave || '';
             const puzzleImageSrc = data.imageSrc || '';
@@ -146,7 +146,7 @@ export const store = createStore({
 
                 commit('setRestorePuzzleGroups', restorePuzzleGroups);
                 commit('setPuzzleTilesFlip', puzzleTilesFlip);
-                dispatch('setTime', time);
+                commit('setTime', time);
             }
 
             // load puzzle image
