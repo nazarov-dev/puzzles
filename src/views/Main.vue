@@ -2,9 +2,8 @@
     <div>
         <header>
             <h1>
-                Time:
-                <GameTimer :stopTimer="stopTimer"></GameTimer>
-                <span v-show="isWin"> - You win!!!</span>
+                Time: <GameTimer></GameTimer>
+                <span v-show="isUserWin"> - You win!!!</span>
             </h1>
 
             <div v-if="puzzleImage">
@@ -12,7 +11,7 @@
 
                 <br><br>
 
-                <button v-show="!isWin" @click="saveData">Save</button> |
+                <button v-show="!isUserWin" @click="saveData">Save</button> |
                 <button @click="reset">Reset</button> |
 
                 <button @click="displayImagePreview">Preview</button>
@@ -52,8 +51,6 @@ export default {
 
     data() {
       return {
-          isWin: false,
-          stopTimer: false,
           showPreview: false,
           zoomStep: 0.5,
       }
@@ -62,6 +59,7 @@ export default {
     computed: {
         ...mapState([
             'puzzleImage',
+            'isUserWin',
         ]),
 
         blurImage() {
@@ -75,12 +73,8 @@ export default {
             'saveData',
             'resetData',
             'updateCanvasSize',
+            'userWin',
         ]),
-
-        userWin() {
-            this.isWin = true;
-            this.stopTimer = true;
-        },
 
         displayImagePreview() {
             this.showPreview = !this.showPreview;

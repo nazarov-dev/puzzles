@@ -23,6 +23,8 @@ export const store = createStore({
             time: 0,
             isTimerRun: false,
 
+            isUserWin: false,
+
             zoom: 1,
             stageWidth: 500,
             stageHeight: 500,
@@ -58,6 +60,10 @@ export const store = createStore({
 
         setTimerRun(state, isRun) {
             state.isTimerRun = isRun;
+        },
+
+        setUserWin(state, isWin) {
+            state.isUserWin = isWin;
         },
 
         setZoom(state, zoom) {
@@ -168,6 +174,11 @@ export const store = createStore({
 
         stopGameTimer({commit}) {
             commit('setTimerRun', false);
+        },
+
+        userWin({commit, dispatch}) {
+            dispatch('stopGameTimer');
+            commit('setUserWin', true);
         },
 
         setZoom({commit}, zoom) {

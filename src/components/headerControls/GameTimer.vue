@@ -8,10 +8,6 @@
     export default {
         name: "GameTimer",
 
-        props: [
-            'stopTimer',
-        ],
-
         data() {
             return {
                 timer: null,
