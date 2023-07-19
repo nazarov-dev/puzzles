@@ -207,6 +207,7 @@
                 'removeGroupById',
                 'pushGroupToTop',
                 'setZoom',
+                'runGameTimer',
             ]),
 
             mergeGroups(groupsToMerge) {
@@ -534,9 +535,13 @@
             },
         },
 
-        mounted() {
+        created() {
             this.createPuzzles();
         },
+
+        mounted() {
+            this.runGameTimer();
+        }
 
     }
 </script>

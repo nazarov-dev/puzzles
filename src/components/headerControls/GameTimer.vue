@@ -3,7 +3,7 @@
 </template>
 
 <script>
-    import { mapState, mapActions } from 'vuex';
+    import { mapState, mapMutations, mapActions } from 'vuex';
 
     export default {
         name: "GameTimer",
@@ -21,6 +21,7 @@
         computed: {
             ...mapState([
                 'time',
+                'isTimerRun',
             ]),
 
             seconds() {
@@ -38,8 +39,14 @@
         },
 
         methods: {
-            ...mapActions([
+            ...mapMutations([
                 'setTime',
+            ]),
+
+            ...mapActions([
+                // use runGameTimer/stopGameTimer to control the game timer
+                'runGameTimer',
+                'stopGameTimer',
             ]),
 
             twoDigits(val) {
@@ -47,8 +54,6 @@
             },
 
             start() {
-                this.pause();
-
                 this.timer = setInterval(() => {
                     let newTime = this.time + 1;
 
@@ -60,21 +65,25 @@
                 clearInterval(this.timer);
             },
 
+            timerRun(isTimerRun) {
+                if (isTimerRun) {
+                    this.start();
+                }
+                else {
+                    this.pause();
+                }
+            },
+
         },
 
         watch: {
-            stopTimer() {
-                if (this.stopTimer) {
-                    this.pause();
-                }
-                else {
-                    this.start();
-                }
-            }
+            isTimerRun(value) {
+                this.timerRun(value);
+            },
         },
 
         mounted() {
-            this.start();
+            this.timerRun(this.isTimerRun);
         }
     }
 </script>

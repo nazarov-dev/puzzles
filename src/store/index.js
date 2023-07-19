@@ -9,19 +9,23 @@ export const store = createStore({
             restorePuzzleGroups: [],
             puzzleTilesFlip: [],
             urlSave: '',
-            time: 0,
-            zoom: 1,
-            stageWidth: 500,
-            stageHeight: 500,
+            tilesNumberHorizontal: 0,
+            tilesNumberVertical: 0,
+            canvasOffset: 0,
+
             groups: [],
             puzzles: {},
             puzzleImageSrc: '',
             puzzleImage: null,
             puzzleWidth: 0,
             puzzleHeight: 0,
-            tilesNumberHorizontal: 0,
-            tilesNumberVertical: 0,
-            canvasOffset: 0,
+
+            time: 0,
+            isTimerRun: false,
+
+            zoom: 1,
+            stageWidth: 500,
+            stageHeight: 500,
         }
     },
 
@@ -50,6 +54,10 @@ export const store = createStore({
 
         setTime(state, time) {
             state.time = +time;
+        },
+
+        setTimerRun(state, isRun) {
+            state.isTimerRun = isRun;
         },
 
         setZoom(state, zoom) {
@@ -154,8 +162,12 @@ export const store = createStore({
             }, puzzleImageSrc);
         },
 
-        setTime({commit}, time) {
-            commit('setTime', +time);
+        runGameTimer({commit}) {
+            commit('setTimerRun', true);
+        },
+
+        stopGameTimer({commit}) {
+            commit('setTimerRun', false);
         },
 
         setZoom({commit}, zoom) {
