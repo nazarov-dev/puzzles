@@ -67,6 +67,7 @@
                 'zoom',
                 'stageWidth',
                 'stageHeight',
+                'isUserWin',
             ]),
 
             ...mapGetters([
@@ -451,6 +452,8 @@
             },
 
             checkGameIsEnd() {
+                if (this.isUserWin) return;
+
                 if (this.groups.length === 1) {
                     this.$emit('win');
                 }
