@@ -5,6 +5,19 @@
             tilesNumberHorizontal: 2,
             tilesNumberVertical: 3,
             canvasOffset: 20,
+            onValid: (data) => {
+                console.log('data:', data);
+
+                function deleteData() {
+                    const timeNow = Date.now();
+
+                    console.log('timeNow:', timeNow );
+
+                    localStorage.removeItem('puzzles');
+                }
+
+                deleteData();
+            }
         };
 
         // for test use data from the localStorage

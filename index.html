@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Puzzles</title>
-    <script defer="defer" src="dist/js/chunk-vendors.js?120"></script>
-    <script defer="defer" src="dist/js/app.js?120"></script>
-    <link href="dist/css/app.css?120" rel="stylesheet">
+    <script defer="defer" src="dist/js/chunk-vendors.js?121"></script>
+    <script defer="defer" src="dist/js/app.js?121"></script>
+    <link href="dist/css/app.css?121" rel="stylesheet">
 </head>
 <body>
 <div id="app"></div>
@@ -19,6 +19,19 @@
             tilesNumberHorizontal: 20,
             tilesNumberVertical: 30,
             canvasOffset: 20,
+            onValid: (data) => {
+                console.log('data:', data);
+
+                function deleteData() {
+                    const timeNow = Date.now();
+
+                    console.log('timeNow:', timeNow );
+
+                    localStorage.removeItem('puzzles');
+                }
+
+                deleteData();
+            }
         };
 
         // for test use data from the localStorage

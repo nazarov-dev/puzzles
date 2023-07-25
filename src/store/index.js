@@ -9,6 +9,7 @@ export const store = createStore({
             restorePuzzleGroups: [],
             puzzleTilesFlip: [],
             urlSave: '',
+            onValidFunc: null,
             tilesNumberHorizontal: 0,
             tilesNumberVertical: 0,
             canvasOffset: 0,
@@ -64,6 +65,10 @@ export const store = createStore({
 
         setUserWin(state, isWin) {
             state.isUserWin = isWin;
+        },
+
+        setonValidFunc(state, onValidFunc) {
+            state.onValidFunc = onValidFunc;
         },
 
         setZoom(state, zoom) {
@@ -132,6 +137,7 @@ export const store = createStore({
         initApp({commit}, data) {
             const isDataRestored = !!data.importData;
             const urlSave = data.urlSave || '';
+            const onValidFunc = data.onValid;
             const puzzleImageSrc = data.imageSrc || '';
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
             const tilesNumberVertical = +data.tilesNumberVertical || 0;
@@ -140,6 +146,7 @@ export const store = createStore({
             // init data
             commit('setIsDataRestored', isDataRestored);
             commit('setUrlSave', urlSave);
+            commit('setonValidFunc', onValidFunc);
             commit('setPuzzleImageSrc', puzzleImageSrc);
             commit('setPuzzleTilesNumberHorizontal', tilesNumberHorizontal);
             commit('setPuzzleTilesNumberVertical', tilesNumberVertical);
@@ -176,9 +183,17 @@ export const store = createStore({
             commit('setTimerRun', false);
         },
 
-        userWin({commit, dispatch}) {
+        userWin({state, commit, dispatch}) {
             dispatch('stopGameTimer');
             commit('setUserWin', true);
+
+            if (state.onValidFunc) {
+                let data = {
+                    time: state.time,
+                };
+
+                state.onValidFunc(data);
+            }
         },
 
         setZoom({commit}, zoom) {
