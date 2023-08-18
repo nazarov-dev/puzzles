@@ -134,7 +134,7 @@ export const store = createStore({
     },
 
     actions: {
-        initApp({commit}, data) {
+        initApp({commit, dispatch}, data) {
             const isDataRestored = !!data.importData;
             const exportConfig = data.exportConfig || {};
             const onValidFunc = data.onValid;
@@ -142,6 +142,8 @@ export const store = createStore({
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
             const tilesNumberVertical = +data.tilesNumberVertical || 0;
             const canvasOffset = +data.canvasOffset || 0;
+
+            dispatch('lockMobileDeviceOrientation');
 
             // init data
             commit('setIsDataRestored', isDataRestored);
@@ -246,6 +248,12 @@ export const store = createStore({
 
         resetData() {
             localStorage.removeItem('puzzles');
+        },
+
+        lockMobileDeviceOrientation() {
+            if (window.innerWidth < 800) {
+                window.screen.orientation.lock();
+            }
         },
 
     }
