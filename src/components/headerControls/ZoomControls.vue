@@ -1,5 +1,5 @@
 <template>
-    <span class="">
+    <span class="zoom">
         <button @click="zoomDecrease">Zoom -</button>
         {{ roundedZoom }}
         <button @click="zoomIncrease">Zoom +</button>
@@ -54,5 +54,7 @@
 </script>
 
 <style scoped>
-
+    .zoom {
+        margin: 0 5px;
+    }
 </style>

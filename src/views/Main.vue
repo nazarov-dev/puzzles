@@ -1,24 +1,27 @@
 <template>
     <div id="puzzle-main">
         <header>
-            <h1>
+            <h2>
                 Time: <GameTimer></GameTimer>
                 <span v-show="isUserWin"> - You win!!!</span>
-            </h1>
+            </h2>
 
-            <div v-if="puzzleImage">
-                <ZoomControls :step="zoomStep"></ZoomControls>
+            <div v-if="puzzleImage" class="controls">
+                <p>
+                    <ZoomControls :step="zoomStep"></ZoomControls>
+                </p>
 
-                <br><br>
+                <p>
+                    <button v-show="!isUserWin" @click="saveData">Save</button> |
+                    <button @click="reset">Reset</button> |
 
-                <button v-show="!isUserWin" @click="saveData">Save</button> |
-                <button @click="reset">Reset</button> |
+                    <button @click="displayImagePreview">Preview</button>
+                    <ImagePreview :show="showPreview"></ImagePreview>
+                </p>
 
-                <button @click="displayImagePreview">Preview</button>
-                <ImagePreview :show="showPreview"></ImagePreview>
-
-                <br><br>
-                <button @click="fullScreen">FullScreen</button>
+                <p>
+                    <button @click="fullScreen">FullScreen</button>
+                </p>
             </div>
         </header>
 
@@ -107,6 +110,53 @@ export default {
 </script>
 
 <style scoped>
+    header {
+        position: relative;
+        z-index: 1;
+        padding: 5px 20px;
+        background: #fff;
+        box-shadow: 2px 2px 5px #555;
+    }
+
+    @media (min-width: 800px) {
+        header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 15px 20px;
+        }
+    }
+
+    h2 {
+        margin: 5px 20px 5px 0;
+    }
+
+    p {
+        margin: 0 0 7px;
+    }
+
+    @media (min-width: 800px) {
+        p {
+            margin: 0;
+        }
+    }
+
+    @media (min-width: 800px) {
+        .controls {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    button {
+        margin: 0 5px;
+    }
+
+    .blur {
+        filter: blur(4px);
+    }
+
     #puzzle-container {
         max-width: 100%;
         /*width: 600px;*/
@@ -116,9 +166,5 @@ export default {
         height: 100vh;
         margin: 0;
         background: #eee;
-    }
-
-    .blur {
-        filter: blur(4px);
     }
 </style>
