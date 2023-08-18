@@ -1,34 +1,55 @@
 import axios from 'axios';
 import LZString from 'lz-string';
 
-export function importPuzzles(dataToRestore = {}) {
-    const dataInJSON = LZString.decompress(LZString.decompressFromEncodedURIComponent(dataToRestore));
+function compressData(data) {
+    const dataInJSON = JSON.stringify(data);
+
+    return LZString.compressToEncodedURIComponent(LZString.compress(dataInJSON));
+}
+
+function decompressData(data) {
+    const dataInJSON = LZString.decompress(LZString.decompressFromEncodedURIComponent(data));
 
     return JSON.parse(dataInJSON);
 }
 
-export async function exportPuzzles(config, dataToSave) {
-    const dataInJSON = JSON.stringify(dataToSave);
+function sentDataToServer(data) {
+    const exportConfig = window.puzzles.exportConfig;
+    
+    // insert data into the config to send
+    let config = {
+        ...exportConfig,
+        data,
+    };
 
-    let dataCompressed = LZString.compressToEncodedURIComponent(LZString.compress(dataInJSON));
+    // send data with axios
+    axios(config)
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.warn(error);
+        });
+}
 
-    // use exportConfig for send data to the server
-    // for test save data to the localStorage
-    if (config) {
-        let exportConfig = {
-            ...config,
-            data: dataCompressed
-        };
+export function importPuzzles(dataToRestore = '') {
+    return decompressData(dataToRestore);
+}
 
-        axios(exportConfig)
-            .then(function (response) {
-                console.log(response);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
-    else {
-        localStorage.setItem('puzzles', dataCompressed);
-    }
+export async function exportPuzzles(dataToSave) {
+    let data = compressData(dataToSave);
+
+    sentDataToServer(data);
+}
+
+export async function exportPuzzlesFromLocalStorage() {
+    let data = localStorage.getItem('puzzles');
+
+    sentDataToServer(data);
+}
+
+export async function savePuzzlesToLocalStorage(dataToSave) {
+    let data = compressData(dataToSave);
+
+    localStorage.setItem('puzzles', data);
 }

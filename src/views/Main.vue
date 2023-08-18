@@ -35,7 +35,6 @@
 
 <script>
     import { mapState, mapActions } from 'vuex';
-    import { importPuzzles } from "../services/PuzzlesService";
     import Puzzles from '../components/puzzleCanvas/Puzzles';
     import GameTimer from "../components/headerControls/GameTimer";
     import ImagePreview from "../components/headerControls/ImagePreview";
@@ -74,7 +73,7 @@ export default {
         ...mapActions([
             'initApp',
             'saveData',
-            'resetData',
+            'resetLocalStorageData',
             'updateCanvasSize',
             'userWin',
             'fullScreen',
@@ -86,7 +85,7 @@ export default {
 
         reset() {
             // reset saved data in localStorage
-            this.resetData();
+            this.resetLocalStorageData();
 
             // reload the page
             location.reload();
@@ -101,16 +100,6 @@ export default {
 
     beforeMount() {
       // here we can initialize the data from server on the first load
-
-        let importData = window.puzzles.importData;
-
-        if (importData) {
-            let { time, groups, tilesFlip } = importPuzzles(importData);
-
-            window.puzzles.time = time;
-            window.puzzles.groups = groups;
-            window.puzzles.tilesFlip = tilesFlip;
-        }
 
         this.initApp(window.puzzles);
     }

@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 import LoadImage from '../utils/LoadImage';
-import { exportPuzzles } from '../services/PuzzlesService';
+import { exportPuzzles, savePuzzlesToLocalStorage } from '../services/PuzzlesService';
 
 export const store = createStore({
     state () {
@@ -8,7 +8,7 @@ export const store = createStore({
             isDataRestored: false,
             restorePuzzleGroups: [],
             puzzleTilesFlip: [],
-            exportConfig: {},
+            saveToLocalStorageInterval: 30000,
             onValidFunc: null,
             tilesNumberHorizontal: 0,
             tilesNumberVertical: 0,
@@ -77,8 +77,8 @@ export const store = createStore({
             state.zoom = +zoom;
         },
 
-        setExportConfig(state, config) {
-            state.exportConfig = config;
+        setSaveToLocalStorageInterval(state, intervalInSeconds) {
+            state.saveToLocalStorageInterval = intervalInSeconds;
         },
 
         setPuzzles(state, puzzles) {
@@ -142,7 +142,7 @@ export const store = createStore({
     actions: {
         initApp({commit, dispatch}, data) {
             const isDataRestored = !!data.importData;
-            const exportConfig = data.exportConfig || {};
+            const saveToLocalStorageInterval = +data.saveToLocalStorageInterval || 0;
             const onValidFunc = data.onValid;
             const puzzleImageSrc = data.imageSrc || '';
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
@@ -153,7 +153,7 @@ export const store = createStore({
 
             // init data
             commit('setIsDataRestored', isDataRestored);
-            commit('setExportConfig', exportConfig);
+            commit('setSaveToLocalStorageInterval', saveToLocalStorageInterval);
             commit('setonValidFunc', onValidFunc);
             commit('setPuzzleImageSrc', puzzleImageSrc);
             commit('setPuzzleTilesNumberHorizontal', tilesNumberHorizontal);
@@ -180,6 +180,8 @@ export const store = createStore({
                 commit('setPuzzleWidth', puzzleWidth);
                 commit('setPuzzleHeight', puzzleHeight);
                 commit('setPuzzleImage', image);
+
+                dispatch('initAutoSaving');
             }, puzzleImageSrc);
         },
 
@@ -193,6 +195,7 @@ export const store = createStore({
 
         userWin({state, commit, dispatch}) {
             dispatch('stopGameTimer');
+            dispatch('resetLocalStorageData');
             commit('setUserWin', true);
 
             if (state.onValidFunc) {
@@ -228,31 +231,66 @@ export const store = createStore({
             commit('setStageHeight', canvasContainer.offsetHeight);
         },
 
-        saveData({state}) {
-            const exportConfig = state.exportConfig;
+        prepareDataToSave({state}) {
+            return new Promise((resolve) => {
+                let groups = state.groups.map(({id, x, y, tiles}) => {
 
-            let groups = state.groups.map(({id, x, y, tiles}) => {
+                    // save only id of the grouped tiles
+                    let tilesIdArray = tiles.map(tile => tile.id);
 
-                // save only id of the grouped tiles
-                let tilesIdArray = tiles.map(tile => tile.id);
+                    return {
+                        id, x, y,
+                        tilesIdArray,
+                    }
+                });
 
-                return {
-                    id, x, y,
-                    tilesIdArray,
-                }
+                let dataToSave = {
+                    time: state.time,
+                    groups,
+                    tilesFlip: state.puzzleTilesFlip
+                };
+
+                resolve(dataToSave);
             });
-
-            let dataToSave = {
-                time: state.time,
-                groups,
-                tilesFlip: state.puzzleTilesFlip
-            };
-
-            // send data to the server
-            exportPuzzles(exportConfig, dataToSave);
         },
 
-        resetData() {
+        initAutoSaving({state, dispatch}) {
+            if (!state.saveToLocalStorageInterval) return;
+
+            let saveFn = function () {
+                setTimeout(async () => {
+                    // stop auto save if game is ended
+                    if(state.isUserWin) return;
+
+                    let dataToSave = await dispatch('prepareDataToSave');
+
+                    // save to localStorage
+                    await savePuzzlesToLocalStorage(dataToSave);
+
+                    // send to the server
+                    await dispatch('sendDataToServer', dataToSave);
+
+                    saveFn();
+                }, state.saveToLocalStorageInterval * 1000);
+            };
+
+            saveFn();
+        },
+
+        async saveData({dispatch}) {
+            // use to manual save data to the server
+
+            let dataToSave = await dispatch('prepareDataToSave');
+
+            // send data to the server
+            dispatch('sendDataToServer', dataToSave);
+        },
+
+        sendDataToServer(state, data) {
+            exportPuzzles(data);
+        },
+
+        resetLocalStorageData() {
             localStorage.removeItem('puzzles');
         },
 
