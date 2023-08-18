@@ -4,6 +4,7 @@
             tilesNumberHorizontal: 2,
             tilesNumberVertical: 3,
             canvasOffset: 20,
+            saveToLocalStorageInterval: 30, // set "0" or "null" to don't save
 
             // exportConfig use in - services/PuzzlesService.js:exportPuzzles(exportConfig, dataToSave)
             exportConfig: {
@@ -29,4 +30,4 @@
         };
 
         // for test use data from the localStorage
-        window.puzzles.importData = localStorage.getItem('puzzles');</script></body></html>
+        // window.puzzles.importData = localStorage.getItem('puzzles');</script></body></html>
