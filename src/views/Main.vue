@@ -90,6 +90,8 @@ export default {
             // reset saved data in localStorage
             this.resetLocalStorageData();
 
+            window.handleReset = true;
+
             // reload the page
             location.reload();
         },

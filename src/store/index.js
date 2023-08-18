@@ -298,6 +298,9 @@ export const store = createStore({
             if (window.innerWidth > 800) return;
 
             const onConfirmRefresh = function (event) {
+                // check if the user refreshed the page with the "Reset" button from the app control panel
+                if (window.handleReset) return true;
+
                 event.preventDefault();
                 return event.returnValue = "Are you sure you want to leave the page?";
             };
