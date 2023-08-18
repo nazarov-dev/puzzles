@@ -8,7 +8,8 @@
 
             <div v-if="puzzleImage" class="controls">
                 <p>
-                    <ZoomControls :step="zoomStep"></ZoomControls>
+                    <ZoomControls :step="zoomStep"></ZoomControls> |
+                    <button @click="fullScreen">FullScreen</button> |
                 </p>
 
                 <p>
@@ -17,10 +18,6 @@
 
                     <button @click="displayImagePreview">Preview</button>
                     <ImagePreview :show="showPreview"></ImagePreview>
-                </p>
-
-                <p>
-                    <button @click="fullScreen">FullScreen</button>
                 </p>
             </div>
         </header>
@@ -115,7 +112,7 @@ export default {
     header {
         position: relative;
         z-index: 1;
-        padding: 5px 20px;
+        padding: 0 20px 1px;
         background: #fff;
         box-shadow: 2px 2px 5px #555;
     }
@@ -125,12 +122,13 @@ export default {
             display: flex;
             flex-direction: row;
             align-items: center;
-            padding: 15px 20px;
+            padding: 5px 20px;
         }
     }
 
     h2 {
-        margin: 5px 20px 5px 0;
+        margin: 0;
+        padding: 0 20px 2px 0;
     }
 
     p {
@@ -160,13 +158,15 @@ export default {
     }
 
     #puzzle-container {
-        max-width: 100%;
-        /*width: 600px;*/
-        /*height: 450px;*/
-        /*margin: 20px auto;*/
         width: 100%;
-        height: 100vh;
+        height: calc(100vh - 86px); /* reduce the header height */
         margin: 0;
         background: #eee;
+    }
+
+    @media (min-width: 800px) {
+        #puzzle-container {
+            height: calc(100vh - 39px); /* reduce the header height */
+        }
     }
 </style>
