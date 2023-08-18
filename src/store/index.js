@@ -29,6 +29,8 @@ export const store = createStore({
             zoom: 1,
             stageWidth: 500,
             stageHeight: 500,
+
+            canLockOrientation: true,
         }
     },
 
@@ -131,10 +133,14 @@ export const store = createStore({
             state.stageHeight = +height;
         },
 
+        disableLockOrientation(state) {
+            state.canLockOrientation = false;
+        },
+
     },
 
     actions: {
-        initApp({commit, dispatch}, data) {
+        initApp({commit}, data) {
             const isDataRestored = !!data.importData;
             const exportConfig = data.exportConfig || {};
             const onValidFunc = data.onValid;
@@ -142,8 +148,6 @@ export const store = createStore({
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
             const tilesNumberVertical = +data.tilesNumberVertical || 0;
             const canvasOffset = +data.canvasOffset || 0;
-
-            dispatch('lockMobileDeviceOrientation');
 
             // init data
             commit('setIsDataRestored', isDataRestored);
@@ -250,9 +254,36 @@ export const store = createStore({
             localStorage.removeItem('puzzles');
         },
 
-        lockMobileDeviceOrientation() {
-            if (window.innerWidth < 800) {
-                window.screen.orientation.lock();
+        fullScreen({dispatch}) {
+
+            if (!document.fullscreenElement) {
+
+                document.getElementById('puzzle-main').requestFullscreen();
+
+                dispatch('lockMobileDeviceOrientation', true);
+
+            } else if (document.exitFullscreen) {
+
+                document.exitFullscreen();
+
+                dispatch('lockMobileDeviceOrientation', false);
+            }
+        },
+
+        lockMobileDeviceOrientation({state, commit }, lockState) {
+            // will work only in full-screen mode
+
+            if (!state.canLockOrientation) return;
+
+            if (lockState) {
+                screen.orientation.lock("any")
+                    .catch(error => {
+                        commit('disableLockOrientation');
+                        console.warn(error);
+                    })
+            }
+            else {
+                screen.orientation.unlock();
             }
         },
 

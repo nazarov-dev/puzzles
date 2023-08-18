@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="puzzle-main">
         <header>
             <h1>
                 Time: <GameTimer></GameTimer>
@@ -16,6 +16,9 @@
 
                 <button @click="displayImagePreview">Preview</button>
                 <ImagePreview :show="showPreview"></ImagePreview>
+
+                <br><br>
+                <button @click="fullScreen">FullScreen</button>
             </div>
         </header>
 
@@ -74,6 +77,7 @@ export default {
             'resetData',
             'updateCanvasSize',
             'userWin',
+            'fullScreen',
         ]),
 
         displayImagePreview() {
