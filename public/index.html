@@ -12,11 +12,19 @@
     <script>
         window.puzzles = {
             importData: '', // LZString - the last saved game data from the server
-            urlSave: '', // use in - services/PuzzlesService.js:exportPuzzles(url, dataToSave)
             imageSrc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
             tilesNumberHorizontal: 2,
             tilesNumberVertical: 3,
             canvasOffset: 20,
+
+            // exportConfig use in - services/PuzzlesService.js:exportPuzzles(exportConfig, dataToSave)
+            exportConfig: {
+                method: 'post',
+                url: 'https://urlSave',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            },
             onValid: (data) => {
                 console.log('data:', data);
 

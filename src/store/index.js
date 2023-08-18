@@ -8,7 +8,7 @@ export const store = createStore({
             isDataRestored: false,
             restorePuzzleGroups: [],
             puzzleTilesFlip: [],
-            urlSave: '',
+            exportConfig: {},
             onValidFunc: null,
             tilesNumberHorizontal: 0,
             tilesNumberVertical: 0,
@@ -75,8 +75,8 @@ export const store = createStore({
             state.zoom = +zoom;
         },
 
-        setUrlSave(state, url) {
-            state.urlSave = url;
+        setExportConfig(state, config) {
+            state.exportConfig = config;
         },
 
         setPuzzles(state, puzzles) {
@@ -136,7 +136,7 @@ export const store = createStore({
     actions: {
         initApp({commit}, data) {
             const isDataRestored = !!data.importData;
-            const urlSave = data.urlSave || '';
+            const exportConfig = data.exportConfig || {};
             const onValidFunc = data.onValid;
             const puzzleImageSrc = data.imageSrc || '';
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
@@ -145,7 +145,7 @@ export const store = createStore({
 
             // init data
             commit('setIsDataRestored', isDataRestored);
-            commit('setUrlSave', urlSave);
+            commit('setExportConfig', exportConfig);
             commit('setonValidFunc', onValidFunc);
             commit('setPuzzleImageSrc', puzzleImageSrc);
             commit('setPuzzleTilesNumberHorizontal', tilesNumberHorizontal);
@@ -221,7 +221,7 @@ export const store = createStore({
         },
 
         saveData({state}) {
-            const url = state.urlSave;
+            const exportConfig = state.exportConfig;
 
             let groups = state.groups.map(({id, x, y, tiles}) => {
 
@@ -241,7 +241,7 @@ export const store = createStore({
             };
 
             // send data to the server
-            exportPuzzles(url, dataToSave);
+            exportPuzzles(exportConfig, dataToSave);
         },
 
         resetData() {

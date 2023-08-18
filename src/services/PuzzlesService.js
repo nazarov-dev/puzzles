@@ -7,15 +7,20 @@ export function importPuzzles(dataToRestore = {}) {
     return JSON.parse(dataInJSON);
 }
 
-export async function exportPuzzles(url, dataToSave) {
+export async function exportPuzzles(config, dataToSave) {
     const dataInJSON = JSON.stringify(dataToSave);
 
     let dataCompressed = LZString.compressToEncodedURIComponent(LZString.compress(dataInJSON));
 
-    // use an url for send data to the server
+    // use exportConfig for send data to the server
     // for test save data to the localStorage
-    if (url) {
-        axios.post(url, dataCompressed)
+    if (config) {
+        let exportConfig = {
+            ...config,
+            data: dataCompressed
+        };
+
+        axios(exportConfig)
             .then(function (response) {
                 console.log(response);
             })
