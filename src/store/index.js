@@ -140,7 +140,7 @@ export const store = createStore({
     },
 
     actions: {
-        initApp({commit}, data) {
+        initApp({commit, dispatch}, data) {
             const isDataRestored = !!data.importData;
             const exportConfig = data.exportConfig || {};
             const onValidFunc = data.onValid;
@@ -148,6 +148,8 @@ export const store = createStore({
             const tilesNumberHorizontal = +data.tilesNumberHorizontal || 0;
             const tilesNumberVertical = +data.tilesNumberVertical || 0;
             const canvasOffset = +data.canvasOffset || 0;
+
+            dispatch('initPreventPageReload');
 
             // init data
             commit('setIsDataRestored', isDataRestored);
@@ -252,6 +254,17 @@ export const store = createStore({
 
         resetData() {
             localStorage.removeItem('puzzles');
+        },
+
+        initPreventPageReload() {
+            if (window.innerWidth > 800) return;
+
+            const onConfirmRefresh = function (event) {
+                event.preventDefault();
+                return event.returnValue = "Are you sure you want to leave the page?";
+            };
+
+            window.addEventListener("beforeunload", onConfirmRefresh, { capture: true });
         },
 
         fullScreen({dispatch}) {
