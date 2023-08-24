@@ -183,6 +183,8 @@ export const store = createStore({
 
                 dispatch('initAutoSaving');
             }, puzzleImageSrc);
+
+            dispatch('initLockMobileDeviceOrientation');
         },
 
         runGameTimer({commit}) {
@@ -314,17 +316,17 @@ export const store = createStore({
 
                 document.getElementById('puzzle-main').requestFullscreen();
 
-                dispatch('lockMobileDeviceOrientation', true);
+                dispatch('lockMobileDeviceFullScreenOrientation', true);
 
             } else if (document.exitFullscreen) {
 
                 document.exitFullscreen();
 
-                dispatch('lockMobileDeviceOrientation', false);
+                dispatch('lockMobileDeviceFullScreenOrientation', false);
             }
         },
 
-        lockMobileDeviceOrientation({state, commit }, lockState) {
+        lockMobileDeviceFullScreenOrientation({state, commit }, lockState) {
             // will work only in full-screen mode
 
             if (!state.canLockOrientation) return;
@@ -339,6 +341,38 @@ export const store = createStore({
             else {
                 screen.orientation.unlock();
             }
+        },
+
+        initLockMobileDeviceOrientation() {
+            // screen.orientation.addEventListener("change", (event) => {
+            //     // const type = event.target.type;
+            //     const angle = event.target.angle;
+            //     // console.log(`ScreenOrientation change: ${type}, ${angle} degrees.`);
+            // });
+
+
+
+            // $(window).bind('orientationchange resize', function(event){
+            //     console.log(this);
+            //
+            //     if (event.orientation) {
+            //         if (event.orientation == 'landscape') {
+            //             if (window.rotation == 90) {
+            //                 rotate(this, -90);
+            //             } else {
+            //                 rotate(this, 90);
+            //             }
+            //         }
+            //     }
+            // });
+
+            // function rotate(el, degs) {
+            //     let transform = 'rotate('+degs+'deg)';
+            //
+            //     console.log(el, transform)
+            //
+            //     // $(el).css(transform);
+            // }
         },
 
     }
