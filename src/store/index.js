@@ -344,35 +344,24 @@ export const store = createStore({
         },
 
         initLockMobileDeviceOrientation() {
-            // screen.orientation.addEventListener("change", (event) => {
-            //     // const type = event.target.type;
-            //     const angle = event.target.angle;
-            //     // console.log(`ScreenOrientation change: ${type}, ${angle} degrees.`);
-            // });
+            const baseAngle = 0;
 
+            const rotate = function(el, angle) {
+                let rotate = angle - baseAngle;
 
+                if (rotate >= 360) {
+                    rotate -= 360;
+                }
 
-            // $(window).bind('orientationchange resize', function(event){
-            //     console.log(this);
-            //
-            //     if (event.orientation) {
-            //         if (event.orientation == 'landscape') {
-            //             if (window.rotation == 90) {
-            //                 rotate(this, -90);
-            //             } else {
-            //                 rotate(this, 90);
-            //             }
-            //         }
-            //     }
-            // });
+                el.setAttribute("style", `rotate:${rotate}deg;`);
+            };
 
-            // function rotate(el, degs) {
-            //     let transform = 'rotate('+degs+'deg)';
-            //
-            //     console.log(el, transform)
-            //
-            //     // $(el).css(transform);
-            // }
+            screen.orientation.addEventListener("change", (event) => {
+                const el = document.getElementsByTagName('HTML')[0];
+                const angle = +event.target.angle;
+
+                rotate(el, angle);
+            });
         },
 
     }

@@ -18,8 +18,6 @@
 
                     <button @click="displayImagePreview">Preview</button>
                     <ImagePreview :show="showPreview"></ImagePreview>
-
-                    {{ angle }}
                 </p>
             </div>
         </header>
@@ -57,8 +55,6 @@ export default {
       return {
           showPreview: false,
           zoomStep: 0.5,
-
-          angle: 0,
       }
     },
 
@@ -102,12 +98,6 @@ export default {
     mounted() {
         const canvasContainer = this.$refs.canvasContainer;
         this.updateCanvasSize(canvasContainer);
-
-        screen.orientation.addEventListener("change", (event) => {
-            // const type = event.target.type;
-            this.angle = event.target.angle;
-            // console.log(`ScreenOrientation change: ${type}, ${angle} degrees.`);
-        });
     },
 
     beforeMount() {
