@@ -184,7 +184,7 @@ export const store = createStore({
                 dispatch('initAutoSaving');
             }, puzzleImageSrc);
 
-            dispatch('initLockMobileDeviceOrientation');
+            // dispatch('initLockMobileDeviceOrientation');
         },
 
         runGameTimer({commit}) {
