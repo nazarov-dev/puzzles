@@ -15,11 +15,16 @@ function decompressData(data) {
 
 function sentDataToServer(data) {
     const exportConfig = window.puzzles.exportConfig;
+
+    const timestamp = Date.now();
     
     // insert data into the config to send
     let config = {
         ...exportConfig,
-        data,
+        data: {
+            data,
+            timestamp,
+        },
     };
 
     // send data with axios
