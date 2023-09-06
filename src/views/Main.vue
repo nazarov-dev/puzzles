@@ -1,5 +1,5 @@
 <template>
-    <div id="puzzle-main">
+    <main id="puzzle-main">
         <header>
             <h2>
                 Time: <GameTimer></GameTimer>
@@ -30,7 +30,7 @@
             ></Puzzles>
             <LoadSpinner v-else></LoadSpinner>
         </div>
-    </div>
+    </main>
 </template>
 
 <script>
@@ -108,7 +108,17 @@ export default {
 }
 </script>
 
+<style>
+    #app {
+        height: 100%;
+    }
+</style>
+
 <style scoped>
+    main {
+        height: 100%;
+    }
+
     header {
         position: relative;
         z-index: 1;
@@ -159,14 +169,14 @@ export default {
 
     #puzzle-container {
         width: 100%;
-        height: calc(100vh - 86px); /* reduce the header height */
+        height: calc(100% - 86px); /* reduce the header height */
         margin: 0;
         /*background: #eee;*/
     }
 
     @media (min-width: 800px) {
         #puzzle-container {
-            height: calc(100vh - 39px); /* reduce the header height */
+            height: calc(100% - 39px); /* reduce the header height */
         }
     }
 </style>
