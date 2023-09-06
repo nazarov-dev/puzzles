@@ -161,7 +161,7 @@ export default {
         width: 100%;
         height: calc(100vh - 86px); /* reduce the header height */
         margin: 0;
-        background: #eee;
+        /*background: #eee;*/
     }
 
     @media (min-width: 800px) {
